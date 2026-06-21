@@ -1,0 +1,89 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  username  String   @unique
+  password  String   // Hashed
+  createdAt DateTime @default(now())
+  loginLogs LoginLog[]
+}
+
+model Resident {
+  id         Int      @id @default(autoincrement())
+  name       String
+  dni        String   @unique
+  status     Status   @default(active)
+  createdAt  DateTime @default(now())
+  vehicles   Vehicle[]
+  accessLogs AccessLog[]
+}
+
+model Vehicle {
+  id         Int      @id @default(autoincrement())
+  plate      String   @unique
+  residentId Int?     @map("resident_id")
+  resident   Resident? @relation(fields: [residentId], references: [id], onDelete: SetNull)
+  createdAt  DateTime @default(now())
+  accessLogs AccessLog[]
+}
+
+model Visitor {
+  id              Int      @id @default(autoincrement())
+  name            String
+  dni             String   @unique
+  hasVehicle      Boolean  @default(false) @map("has_vehicle")
+  vehiclePlate    String?  @map("vehicle_plate")
+  companionsCount Int?     @map("companions_count")
+  status          Status   @default(active)
+  lastEntry       DateTime? @map("last_entry")
+  lastExit        DateTime? @map("last_exit")
+  createdAt       DateTime @default(now())
+}
+
+model AccessLog {
+  id              Int      @id @default(autoincrement())
+  residentId      Int?     @map("resident_id")
+  vehicleId       Int?     @map("vehicle_id")
+  entryDatetime   DateTime @map("entry_datetime")
+  exitDatetime    DateTime? @map("exit_datetime")
+  createdAt       DateTime @default(now())
+  resident        Resident? @relation(fields: [residentId], references: [id], onDelete: SetNull)
+  vehicle         Vehicle?  @relation(fields: [vehicleId], references: [id], onDelete: SetNull)
+}
+
+model ExportLog {
+  id           Int      @id @default(autoincrement())
+  userId       Int?     @map("user_id")
+  sessionId    String   @map("session_id")
+  timestamp    DateTime
+  tableName    String   @map("table_name")
+  searchFilter String?  @map("search_filter")
+}
+
+model LoginLog {
+  id        Int      @id @default(autoincrement())
+  userId    Int?     @map("user_id")
+  username  String
+  ip        String
+  country   String?
+  mac       String?
+  os        String?
+  browser   String?
+  success   Boolean  @default(false)
+  createdAt DateTime @default(now())
+  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+}
+
+enum Status {
+  active
+  inactive
+}
