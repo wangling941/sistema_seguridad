@@ -1,0 +1,43 @@
+# NODE
+node_modules/
+npm-debug.log
+yarn-error.log
+yarn-debug.log
+.env
+dist/
+build/
+coverage/
+
+
+# Backend (Typescript)
+backend/dist/
+backend/node_modules/
+backend/.env
+
+# Frontend (Ionic / Angular)
+frontend/node_modules/
+frontend/.env
+frontend/www/
+frontend/.ionic/
+frontend/dist/
+frontend/.angular/
+frontend/.vscode/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+logs/
+*.log
+
+# Prisma (generated client)
+backend/prisma/*.db
+backend/prisma/*.sqlite
+backend/prisma/migrations/*.db
