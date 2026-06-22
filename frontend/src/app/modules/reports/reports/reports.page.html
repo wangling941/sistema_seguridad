@@ -16,37 +16,41 @@
 
     <section class="form-panel">
       <div class="form-grid">
-        <ion-item
-          ><ion-input
+        <ion-item>
+          <ion-input
             label="Desde"
             labelPlacement="stacked"
             type="date"
             [(ngModel)]="filters.startDate"
-          ></ion-input
-        ></ion-item>
-        <ion-item
-          ><ion-input
+          ></ion-input>
+        </ion-item>
+        <ion-item>
+          <ion-input
             label="Hasta"
             labelPlacement="stacked"
             type="date"
             [(ngModel)]="filters.endDate"
-          ></ion-input
-        ></ion-item>
-        <ion-item
-          ><ion-input
-            label="ID residente"
+          ></ion-input>
+        </ion-item>
+        <ion-item>
+          <ion-select
+            label="Residente"
             labelPlacement="stacked"
-            type="number"
             [(ngModel)]="filters.residentId"
-          ></ion-input
-        ></ion-item>
-        <ion-item
-          ><ion-input
+          >
+            <ion-select-option [value]="null">Todos</ion-select-option>
+            <ion-select-option *ngFor="let r of residents" [value]="r.id">
+              {{ r.name }}
+            </ion-select-option>
+          </ion-select>
+        </ion-item>
+        <ion-item>
+          <ion-input
             label="Placa"
             labelPlacement="stacked"
             [(ngModel)]="filters.vehiclePlate"
-          ></ion-input
-        ></ion-item>
+          ></ion-input>
+        </ion-item>
       </div>
       <div class="form-actions">
         <ion-button fill="clear" color="medium" (click)="clear()"
@@ -67,6 +71,7 @@
               <th>ID</th>
               <th>Residente</th>
               <th>Vehículo</th>
+              <th>Visitante</th>
               <th>Entrada</th>
               <th>Salida</th>
               <th>Estado</th>
@@ -75,8 +80,9 @@
           <tbody>
             <tr *ngFor="let log of logs">
               <td>#{{ log.id }}</td>
-              <td>{{ log.residentId || 'N/A' }}</td>
-              <td>{{ log.vehicleId || 'N/A' }}</td>
+              <td>{{ getResidentName(log.residentId) }}</td>
+              <td>{{ getVehiclePlate(log.vehicleId) }}</td>
+              <td>{{ getVisitorName(log.visitorId) }}</td>
               <td>{{ log.entryDatetime | date:'short' }}</td>
               <td>
                 {{ log.exitDatetime ? (log.exitDatetime | date:'short') :
@@ -91,11 +97,9 @@
           </tbody>
         </table>
       </div>
-      <ng-template #empty
-        ><div class="empty-state">
-          No hay datos con esos filtros.
-        </div></ng-template
-      >
+      <ng-template #empty>
+        <div class="empty-state">No hay datos con esos filtros.</div>
+      </ng-template>
     </section>
   </div>
 </ion-content>

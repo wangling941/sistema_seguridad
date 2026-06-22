@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { ToastController } from '@ionic/angular';
 import { finalize } from 'rxjs';
-import { AccessLog, Resident, Vehicle } from '../../../core/models';
+import { AccessLog, Resident, Vehicle, Visitor } from '../../../core/models';
 import { Api } from '../../../core/services/api';
 
 @Component({
@@ -14,10 +14,22 @@ export class AccessPage implements OnInit {
   logs: AccessLog[] = [];
   residents: Resident[] = [];
   vehicles: Vehicle[] = [];
+  visitors: Visitor[] = [];
+  filteredVehicles: Vehicle[] = [];
   search = '';
   total = 0;
   loading = false;
-  form: Partial<AccessLog> = { residentId: null, vehicleId: null };
+  entryType: 'resident' | 'vehicle' | 'visitor' = 'resident';
+
+  form: {
+    residentId: number | null;
+    vehicleId: number | null;
+    visitorId: number | null;
+  } = {
+    residentId: null,
+    vehicleId: null,
+    visitorId: null,
+  };
 
   constructor(
     private api: Api,
@@ -26,12 +38,20 @@ export class AccessPage implements OnInit {
 
   ngOnInit() {
     this.load();
+    this.loadSelects();
+  }
+
+  loadSelects() {
     this.api
       .getResidents('', 1, 200)
       .subscribe((res) => (this.residents = res.data));
+    this.api.getVehicles('', 1, 200).subscribe((res) => {
+      this.vehicles = res.data;
+      this.filteredVehicles = this.vehicles;
+    });
     this.api
-      .getVehicles('', 1, 200)
-      .subscribe((res) => (this.vehicles = res.data));
+      .getVisitors('', 1, 200)
+      .subscribe((res) => (this.visitors = res.data));
   }
 
   load() {
@@ -45,15 +65,45 @@ export class AccessPage implements OnInit {
       });
   }
 
+  onTypeChange() {
+    this.form = { residentId: null, vehicleId: null, visitorId: null };
+    if (this.entryType === 'resident' || this.entryType === 'vehicle') {
+      this.filteredVehicles = this.vehicles;
+    }
+  }
+
+  onResidentChange() {
+    if (this.form.residentId) {
+      this.filteredVehicles = this.vehicles.filter(
+        (v) => v.residentId === this.form.residentId,
+      );
+      this.form.vehicleId = null;
+    } else {
+      this.filteredVehicles = this.vehicles;
+    }
+  }
+
   createEntry() {
-    const payload = {
-      residentId: this.form.residentId || null,
-      vehicleId: this.form.vehicleId || null,
+    // Validación: si es visitante, debe seleccionar uno
+    if (this.entryType === 'visitor' && !this.form.visitorId) {
+      this.toast('Selecciona un visitante', 'warning');
+      return;
+    }
+
+    const payload: any = {
       entryDatetime: new Date().toISOString(),
     };
+
+    if (this.entryType === 'resident' || this.entryType === 'vehicle') {
+      payload.residentId = this.form.residentId || null;
+      payload.vehicleId = this.form.vehicleId || null;
+    } else if (this.entryType === 'visitor') {
+      payload.visitorId = this.form.visitorId;
+    }
+
     this.api.createAccessLog(payload).subscribe({
       next: () => {
-        this.form = { residentId: null, vehicleId: null };
+        this.form = { residentId: null, vehicleId: null, visitorId: null };
         this.load();
         this.toast('Entrada registrada');
       },
@@ -72,16 +122,23 @@ export class AccessPage implements OnInit {
   }
 
   getResidentName(id: number | null): string {
-    return this.residents.find((r) => r.id === id)?.name || 'Sin residente';
+    const resident = this.residents.find((r) => r.id === id);
+    return resident ? resident.name : 'Sin residente';
   }
 
   getVehiclePlate(id: number | null): string {
-    return this.vehicles.find((v) => v.id === id)?.plate || 'Sin vehículo';
+    const vehicle = this.vehicles.find((v) => v.id === id);
+    return vehicle ? vehicle.plate : 'Sin vehículo';
+  }
+
+  getVisitorName(id: number | null): string {
+    const visitor = this.visitors.find((v) => v.id === id);
+    return visitor ? visitor.name : 'Sin visitante';
   }
 
   private async toast(
     message: string,
-    color: 'success' | 'danger' = 'success',
+    color: 'success' | 'danger' | 'warning' = 'success',
   ) {
     const toast = await this.toastController.create({
       message,

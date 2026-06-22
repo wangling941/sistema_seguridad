@@ -6,6 +6,8 @@ import {
   CountByDate,
   CountByName,
   CountByStatus,
+  Resident,
+  Vehicle,
 } from '../../../core/models';
 
 @Component({
@@ -22,11 +24,23 @@ export class DashboardPage implements OnInit {
   recent: AccessLog[] = [];
   loading = true;
   maxCount = 0;
+  residents: Resident[] = [];
+  vehicles: Vehicle[] = [];
 
   constructor(private api: Api) {}
 
   ngOnInit() {
     this.loadData();
+    this.loadSelects();
+  }
+
+  loadSelects() {
+    this.api
+      .getResidents('', 1, 200)
+      .subscribe((res) => (this.residents = res.data));
+    this.api
+      .getVehicles('', 1, 200)
+      .subscribe((res) => (this.vehicles = res.data));
   }
 
   loadData(): void {
@@ -55,5 +69,15 @@ export class DashboardPage implements OnInit {
 
   total(items: { count: number }[]): number {
     return items.reduce((sum, item) => sum + item.count, 0);
+  }
+
+  getResidentName(id: number | null): string {
+    const resident = this.residents.find((r) => r.id === id);
+    return resident ? resident.name : 'N/A';
+  }
+
+  getVehiclePlate(id: number | null): string {
+    const vehicle = this.vehicles.find((v) => v.id === id);
+    return vehicle ? vehicle.plate : 'N/A';
   }
 }

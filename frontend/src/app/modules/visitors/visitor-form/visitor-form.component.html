@@ -15,10 +15,22 @@
       <ion-label position="floating">Nombre</ion-label>
       <ion-input formControlName="name"></ion-input>
     </ion-item>
+    <ion-item *ngIf="form.get('name')?.invalid && form.get('name')?.touched">
+      <ion-text color="danger"
+        >El nombre es obligatorio y solo letras.</ion-text
+      >
+    </ion-item>
+
     <ion-item>
       <ion-label position="floating">DNI</ion-label>
       <ion-input formControlName="dni"></ion-input>
     </ion-item>
+    <ion-item *ngIf="form.get('dni')?.invalid && form.get('dni')?.touched">
+      <ion-text color="danger"
+        >El DNI debe tener exactamente 8 dígitos numéricos.</ion-text
+      >
+    </ion-item>
+
     <ion-item>
       <ion-label>Estado</ion-label>
       <ion-select formControlName="status">
@@ -26,17 +38,42 @@
         <ion-select-option value="inactive">Inactivo</ion-select-option>
       </ion-select>
     </ion-item>
+
     <ion-item>
       <ion-toggle formControlName="hasVehicle">Tiene vehículo</ion-toggle>
     </ion-item>
+
     <ion-item *ngIf="form.get('hasVehicle')?.value">
       <ion-label position="floating">Placa</ion-label>
       <ion-input formControlName="vehiclePlate"></ion-input>
     </ion-item>
+    <ion-item
+      *ngIf="
+        form.get('hasVehicle')?.value &&
+        form.get('vehiclePlate')?.invalid &&
+        form.get('vehiclePlate')?.touched
+      "
+    >
+      <ion-text color="danger"
+        >La placa solo puede tener letras, números y guiones.</ion-text
+      >
+    </ion-item>
+
     <ion-item>
       <ion-label position="floating">Acompañantes</ion-label>
       <ion-input formControlName="companionsCount" type="number"></ion-input>
     </ion-item>
+    <ion-item
+      *ngIf="
+        form.get('companionsCount')?.invalid &&
+        form.get('companionsCount')?.touched
+      "
+    >
+      <ion-text color="danger"
+        >El número de acompañantes debe ser mayor o igual a 0.</ion-text
+      >
+    </ion-item>
+
     <div class="form-actions" style="padding: 16px">
       <ion-button fill="clear" color="medium" (click)="dismiss()"
         >Cancelar</ion-button

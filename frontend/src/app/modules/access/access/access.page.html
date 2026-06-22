@@ -14,34 +14,68 @@
       </div>
     </div>
 
-    <!-- Formulario rápido de entrada -->
+    <!-- Formulario de registro de entrada -->
     <section class="form-panel">
       <div class="form-grid">
+        <!-- Tipo de acceso -->
         <ion-item>
+          <ion-label>Tipo</ion-label>
+          <ion-select [(ngModel)]="entryType" (ionChange)="onTypeChange()">
+            <ion-select-option value="resident">Residente</ion-select-option>
+            <ion-select-option value="vehicle">Vehículo</ion-select-option>
+            <ion-select-option value="visitor">Visitante</ion-select-option>
+          </ion-select>
+        </ion-item>
+
+        <!-- Residente -->
+        <ion-item *ngIf="entryType === 'resident' || entryType === 'vehicle'">
           <ion-select
             label="Residente"
             labelPlacement="stacked"
             [(ngModel)]="form.residentId"
+            (ionChange)="onResidentChange()"
           >
             <ion-select-option [value]="null">Sin residente</ion-select-option>
-            <ion-select-option *ngFor="let r of residents" [value]="r.id"
-              >{{ r.name }}</ion-select-option
-            >
+            <ion-select-option *ngFor="let r of residents" [value]="r.id">
+              {{ r.name }}
+            </ion-select-option>
           </ion-select>
         </ion-item>
-        <ion-item>
+
+        <!-- Vehículo -->
+        <ion-item *ngIf="entryType === 'resident' || entryType === 'vehicle'">
           <ion-select
             label="Vehículo"
             labelPlacement="stacked"
             [(ngModel)]="form.vehicleId"
           >
             <ion-select-option [value]="null">Sin vehículo</ion-select-option>
-            <ion-select-option *ngFor="let v of vehicles" [value]="v.id"
-              >{{ v.plate }}</ion-select-option
+            <ion-select-option
+              *ngFor="let v of filteredVehicles"
+              [value]="v.id"
             >
+              {{ v.plate }}
+            </ion-select-option>
+          </ion-select>
+        </ion-item>
+
+        <!-- Visitante -->
+        <ion-item *ngIf="entryType === 'visitor'">
+          <ion-select
+            label="Visitante"
+            labelPlacement="stacked"
+            [(ngModel)]="form.visitorId"
+          >
+            <ion-select-option [value]="null"
+              >Seleccionar visitante</ion-select-option
+            >
+            <ion-select-option *ngFor="let vis of visitors" [value]="vis.id">
+              {{ vis.name }} ({{ vis.dni }})
+            </ion-select-option>
           </ion-select>
         </ion-item>
       </div>
+
       <div class="form-actions">
         <ion-button (click)="createEntry()">
           <ion-icon slot="start" name="log-in-outline"></ion-icon>
@@ -50,6 +84,7 @@
       </div>
     </section>
 
+    <!-- Buscador -->
     <div class="toolbar-row">
       <ion-searchbar
         [(ngModel)]="search"
@@ -62,6 +97,7 @@
       </ion-button>
     </div>
 
+    <!-- Tabla de accesos -->
     <section class="data-card">
       <div class="responsive-table" *ngIf="logs.length; else empty">
         <table>
@@ -70,6 +106,7 @@
               <th>ID</th>
               <th>Residente</th>
               <th>Vehículo</th>
+              <th>Visitante</th>
               <th>Entrada</th>
               <th>Salida</th>
               <th>Estado</th>
@@ -81,6 +118,7 @@
               <td>#{{ log.id }}</td>
               <td>{{ getResidentName(log.residentId) }}</td>
               <td>{{ getVehiclePlate(log.vehicleId) }}</td>
+              <td>{{ getVisitorName(log.visitorId) }}</td>
               <td>{{ log.entryDatetime | date:'short' }}</td>
               <td>
                 {{ log.exitDatetime ? (log.exitDatetime | date:'short') :
@@ -105,11 +143,9 @@
           </tbody>
         </table>
       </div>
-      <ng-template #empty
-        ><div class="empty-state">
-          No hay accesos para mostrar.
-        </div></ng-template
-      >
+      <ng-template #empty>
+        <div class="empty-state">No hay accesos para mostrar.</div>
+      </ng-template>
     </section>
   </div>
 </ion-content>

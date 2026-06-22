@@ -15,10 +15,22 @@
       <ion-label position="floating">Nombre</ion-label>
       <ion-input formControlName="name"></ion-input>
     </ion-item>
+    <ion-item *ngIf="form.get('name')?.invalid && form.get('name')?.touched">
+      <ion-text color="danger"
+        >El nombre solo puede contener letras y espacios.</ion-text
+      >
+    </ion-item>
+
     <ion-item>
       <ion-label position="floating">DNI</ion-label>
       <ion-input formControlName="dni"></ion-input>
     </ion-item>
+    <ion-item *ngIf="form.get('dni')?.invalid && form.get('dni')?.touched">
+      <ion-text color="danger"
+        >El DNI debe tener exactamente 8 dígitos numéricos.</ion-text
+      >
+    </ion-item>
+
     <ion-item>
       <ion-label>Estado</ion-label>
       <ion-select formControlName="status">

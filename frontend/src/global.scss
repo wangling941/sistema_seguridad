@@ -161,3 +161,16 @@ ion-content.app-surface {
     align-items: stretch;
   }
 }
+
+.data-card,
+.metric-card,
+.form-panel {
+  background: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+  border: 1px solid #f0f2f5;
+  transition: box-shadow 0.2s ease;
+  &:hover {
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+  }
+}

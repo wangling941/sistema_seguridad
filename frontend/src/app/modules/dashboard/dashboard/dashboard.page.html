@@ -25,7 +25,11 @@
     <div class="stats-grid">
       <ion-card class="stat-card">
         <ion-card-content>
-          <ion-icon name="people-outline" class="stat-icon"></ion-icon>
+          <ion-icon
+            name="people-outline"
+            class="stat-icon"
+            style="color: #0f766e"
+          ></ion-icon>
           <div class="stat-number">{{ total(residentCounts) }}</div>
           <div class="stat-label">Residentes</div>
         </ion-card-content>
@@ -33,7 +37,11 @@
 
       <ion-card class="stat-card">
         <ion-card-content>
-          <ion-icon name="car-outline" class="stat-icon"></ion-icon>
+          <ion-icon
+            name="person-add-outline"
+            class="stat-icon"
+            style="color: #2563eb"
+          ></ion-icon>
           <div class="stat-number">{{ total(visitorCounts) }}</div>
           <div class="stat-label">Visitantes</div>
         </ion-card-content>
@@ -41,7 +49,11 @@
 
       <ion-card class="stat-card">
         <ion-card-content>
-          <ion-icon name="log-in-outline" class="stat-icon"></ion-icon>
+          <ion-icon
+            name="log-in-outline"
+            class="stat-icon"
+            style="color: #ca8a04"
+          ></ion-icon>
           <div class="stat-number">{{ recent.length }}</div>
           <div class="stat-label">Accesos recientes</div>
         </ion-card-content>
@@ -49,7 +61,11 @@
 
       <ion-card class="stat-card">
         <ion-card-content>
-          <ion-icon name="time-outline" class="stat-icon"></ion-icon>
+          <ion-icon
+            name="time-outline"
+            class="stat-icon"
+            style="color: #dc2626"
+          ></ion-icon>
           <div class="stat-number">{{ accessCounts[0]?.count || 0 }}</div>
           <div class="stat-label">Accesos abiertos</div>
         </ion-card-content>
@@ -80,7 +96,7 @@
       </ion-card-content>
     </ion-card>
 
-    <!-- Accesos recientes -->
+    <!-- Últimos accesos -->
     <ion-card class="data-card">
       <ion-card-header>
         <ion-card-title>Últimos accesos</ion-card-title>
@@ -88,12 +104,16 @@
       <ion-card-content>
         <ion-list lines="full" *ngIf="recent.length; else noRecent">
           <ion-item *ngFor="let item of recent">
-            <ion-icon slot="start" name="log-in-outline"></ion-icon>
+            <ion-icon
+              slot="start"
+              name="log-in-outline"
+              [color]="item.exitDatetime ? 'success' : 'warning'"
+            ></ion-icon>
             <ion-label>
               <h3>Acceso #{{ item.id }}</h3>
               <p>
-                Residente {{ item.residentId || 'N/A' }} · Vehículo {{
-                item.vehicleId || 'N/A' }}
+                Residente {{ getResidentName(item.residentId) }} · Vehículo {{
+                getVehiclePlate(item.vehicleId) }}
               </p>
             </ion-label>
             <ion-note slot="end"

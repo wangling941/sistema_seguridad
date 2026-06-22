@@ -49,6 +49,7 @@ export interface AccessLog {
   id: number;
   residentId: number | null;
   vehicleId: number | null;
+  visitorId: number | null;
   entryDatetime: string;
   exitDatetime: string | null;
   createdAt: string;
