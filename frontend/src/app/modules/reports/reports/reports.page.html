@@ -12,8 +12,13 @@
         <h1>Reportes de accesos</h1>
         <p>{{ total }} resultados filtrados</p>
       </div>
+      <ion-button color="danger" (click)="exportReportPDF()" class="export-btn">
+        <ion-icon slot="start" name="document-text-outline"></ion-icon>
+        Exportar PDF
+      </ion-button>
     </div>
 
+    <!-- Filtros -->
     <section class="form-panel">
       <div class="form-grid">
         <ion-item>
@@ -63,6 +68,7 @@
       </div>
     </section>
 
+    <!-- Tabla de resultados -->
     <section class="data-card">
       <div class="responsive-table" *ngIf="logs.length; else empty">
         <table>

@@ -8,3 +8,7 @@ npm install @ionic/storage @ionic/storage-angular
 npm install @auth0/angular-jwt
 npm install chart.js
 npm install rxjs
+
+# Reportes con exportación a PDF
+
+npm install jspdf jspdf-autotable

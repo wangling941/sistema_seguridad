@@ -46,7 +46,7 @@ export class PrismaAccessLogRepository implements IAccessLogRepository {
           id: a.id,
           residentId: a.residentId,
           vehicleId: a.vehicleId,
-          visitorId: a.visitorId, // <-- CORREGIDO
+          visitorId: a.visitorId,
           entryDatetime: a.entryDatetime,
           exitDatetime: a.exitDatetime,
           createdAt: a.createdAt,
@@ -66,7 +66,7 @@ export class PrismaAccessLogRepository implements IAccessLogRepository {
       id: data.id,
       residentId: data.residentId,
       vehicleId: data.vehicleId,
-      visitorId: data.visitorId, // <-- CORREGIDO
+      visitorId: data.visitorId,
       entryDatetime: data.entryDatetime,
       exitDatetime: data.exitDatetime,
       createdAt: data.createdAt,
@@ -88,7 +88,7 @@ export class PrismaAccessLogRepository implements IAccessLogRepository {
       id: data.id,
       residentId: data.residentId,
       vehicleId: data.vehicleId,
-      visitorId: data.visitorId, // <-- CORREGIDO
+      visitorId: data.visitorId,
       entryDatetime: data.entryDatetime,
       exitDatetime: data.exitDatetime,
       createdAt: data.createdAt,
@@ -111,7 +111,7 @@ export class PrismaAccessLogRepository implements IAccessLogRepository {
       id: data.id,
       residentId: data.residentId,
       vehicleId: data.vehicleId,
-      visitorId: data.visitorId, // <-- CORREGIDO
+      visitorId: data.visitorId,
       entryDatetime: data.entryDatetime,
       exitDatetime: data.exitDatetime,
       createdAt: data.createdAt,
@@ -144,7 +144,7 @@ export class PrismaAccessLogRepository implements IAccessLogRepository {
         id: a.id,
         residentId: a.residentId,
         vehicleId: a.vehicleId,
-        visitorId: a.visitorId, // <-- CORREGIDO
+        visitorId: a.visitorId,
         entryDatetime: a.entryDatetime,
         exitDatetime: a.exitDatetime,
         createdAt: a.createdAt,
@@ -233,6 +233,7 @@ export class PrismaAccessLogRepository implements IAccessLogRepository {
       };
     }
 
+    // Si no hay filtros, where queda vacío → devuelve todos
     const [data, total] = await Promise.all([
       prisma.accessLog.findMany({
         where,
@@ -254,7 +255,7 @@ export class PrismaAccessLogRepository implements IAccessLogRepository {
           id: a.id,
           residentId: a.residentId,
           vehicleId: a.vehicleId,
-          visitorId: a.visitorId, // <-- CORREGIDO
+          visitorId: a.visitorId,
           entryDatetime: a.entryDatetime,
           exitDatetime: a.exitDatetime,
           createdAt: a.createdAt,
