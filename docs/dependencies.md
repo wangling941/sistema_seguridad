@@ -23,3 +23,7 @@ npx prisma generate
 # Hacemos la migración
 
 npx prisma migrate dev --name init
+
+# Permitir conectar a PostgreSQL en seed y dev
+
+npm install @prisma/adapter-pg pg
