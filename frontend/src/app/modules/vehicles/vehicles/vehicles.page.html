@@ -1,13 +1,50 @@
-<ion-header [translucent]="true">
+<ion-header>
   <ion-toolbar>
-    <ion-title>vehicles</ion-title>
+    <ion-buttons slot="start"><ion-menu-button></ion-menu-button></ion-buttons>
+    <ion-title>Vehiculos</ion-title>
   </ion-toolbar>
 </ion-header>
 
-<ion-content [fullscreen]="true">
-  <ion-header collapse="condense">
-    <ion-toolbar>
-      <ion-title size="large">vehicles</ion-title>
-    </ion-toolbar>
-  </ion-header>
+<ion-content class="app-surface">
+  <div class="page-wrap">
+    <div class="page-title"><div><h1>Vehiculos</h1><p>{{ total }} placas registradas.</p></div></div>
+    <section class="form-panel">
+      <div class="form-grid">
+        <ion-item><ion-input label="Placa" labelPlacement="stacked" [(ngModel)]="form.plate" name="plate"></ion-input></ion-item>
+        <ion-item>
+          <ion-select label="Residente" labelPlacement="stacked" [(ngModel)]="form.residentId" name="residentId">
+            <ion-select-option [value]="null">Sin residente</ion-select-option>
+            <ion-select-option *ngFor="let resident of residents" [value]="resident.id">{{ resident.name }} · {{ resident.dni }}</ion-select-option>
+          </ion-select>
+        </ion-item>
+      </div>
+      <div class="form-actions">
+        <ion-button fill="clear" color="medium" (click)="resetForm()">Limpiar</ion-button>
+        <ion-button (click)="save()">{{ editingId ? 'Actualizar' : 'Crear vehiculo' }}</ion-button>
+      </div>
+    </section>
+    <div class="toolbar-row">
+      <ion-searchbar [(ngModel)]="search" (ionInput)="load()" placeholder="Buscar por placa o residente"></ion-searchbar>
+      <ion-button fill="outline" (click)="load()"><ion-icon slot="start" name="refresh-outline"></ion-icon>Actualizar</ion-button>
+    </div>
+    <section class="data-card">
+      <div class="responsive-table" *ngIf="vehicles.length; else empty">
+        <table>
+          <thead><tr><th>Placa</th><th>Residente</th><th>Creado</th><th></th></tr></thead>
+          <tbody>
+            <tr *ngFor="let vehicle of vehicles">
+              <td><strong>{{ vehicle.plate }}</strong></td>
+              <td>{{ residentName(vehicle.residentId) }}</td>
+              <td>{{ vehicle.createdAt | date:'short' }}</td>
+              <td class="actions">
+                <ion-button size="small" fill="clear" (click)="edit(vehicle)"><ion-icon slot="icon-only" name="create-outline"></ion-icon></ion-button>
+                <ion-button size="small" fill="clear" color="danger" (click)="remove(vehicle)"><ion-icon slot="icon-only" name="trash-outline"></ion-icon></ion-button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <ng-template #empty><div class="empty-state">No hay vehiculos para mostrar.</div></ng-template>
+    </section>
+  </div>
 </ion-content>

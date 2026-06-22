@@ -1,0 +1,45 @@
+ion-menu {
+  --width: 280px;
+  --background: #ffffff;
+}
+
+.brand-panel {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 24px 20px 16px;
+}
+
+.brand-mark {
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 8px;
+  background: #0f766e;
+  color: #ffffff;
+  font-weight: 800;
+}
+
+.brand-panel h1 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 800;
+}
+
+.brand-panel p {
+  margin: 3px 0 0;
+  color: #64748b;
+  font-size: 13px;
+}
+
+ion-item {
+  --border-radius: 8px;
+  margin: 4px 12px;
+  font-weight: 600;
+}
+
+ion-item.selected {
+  --background: #e7f5f2;
+  --color: #0f766e;
+}

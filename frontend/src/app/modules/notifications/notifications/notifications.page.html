@@ -1,13 +1,30 @@
-<ion-header [translucent]="true">
+<ion-header>
   <ion-toolbar>
-    <ion-title>notifications</ion-title>
+    <ion-buttons slot="start"><ion-menu-button></ion-menu-button></ion-buttons>
+    <ion-title>Notificaciones</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="clear()"><ion-icon slot="icon-only" name="trash-outline"></ion-icon></ion-button>
+    </ion-buttons>
   </ion-toolbar>
 </ion-header>
 
-<ion-content [fullscreen]="true">
-  <ion-header collapse="condense">
-    <ion-toolbar>
-      <ion-title size="large">notifications</ion-title>
-    </ion-toolbar>
-  </ion-header>
+<ion-content class="app-surface">
+  <div class="page-wrap">
+    <div class="page-title"><div><h1>Notificaciones</h1><p>Eventos SSE emitidos por el backend.</p></div></div>
+    <section class="data-card">
+      <ion-list lines="full" *ngIf="(notifications$ | async) as notifications">
+        <ng-container *ngIf="notifications.length; else empty">
+          <ion-item *ngFor="let item of notifications">
+            <ion-icon slot="start" name="notifications-outline"></ion-icon>
+            <ion-label>
+              <h2>{{ item.type }}</h2>
+              <p>{{ item.payload | json }}</p>
+            </ion-label>
+            <ion-note slot="end">{{ item.receivedAt | date:'shortTime' }}</ion-note>
+          </ion-item>
+        </ng-container>
+      </ion-list>
+      <ng-template #empty><div class="empty-state">Aun no hay eventos en tiempo real.</div></ng-template>
+    </section>
+  </div>
 </ion-content>

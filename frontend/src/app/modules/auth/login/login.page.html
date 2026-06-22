@@ -1,13 +1,29 @@
-<ion-header [translucent]="true">
-  <ion-toolbar>
-    <ion-title>login</ion-title>
-  </ion-toolbar>
-</ion-header>
+<ion-content class="login-page">
+  <main class="login-layout">
+    <section class="login-copy">
+      <div class="brand-mark">SP</div>
+      <h1>Seguridad Paraiso Verde</h1>
+      <p>Gestion operativa de residentes, visitantes, vehiculos y accesos con datos en tiempo real.</p>
+    </section>
 
-<ion-content [fullscreen]="true">
-  <ion-header collapse="condense">
-    <ion-toolbar>
-      <ion-title size="large">login</ion-title>
-    </ion-toolbar>
-  </ion-header>
+    <form class="login-card" (ngSubmit)="login()">
+      <h2>Ingresar</h2>
+      <p>Usa el usuario creado por el seed del backend.</p>
+
+      <ion-item>
+        <ion-icon name="person-outline" slot="start"></ion-icon>
+        <ion-input label="Usuario" labelPlacement="stacked" [(ngModel)]="username" name="username" autocomplete="username"></ion-input>
+      </ion-item>
+
+      <ion-item>
+        <ion-icon name="lock-closed-outline" slot="start"></ion-icon>
+        <ion-input label="Contrasena" labelPlacement="stacked" [(ngModel)]="password" name="password" type="password" autocomplete="current-password"></ion-input>
+      </ion-item>
+
+      <ion-button expand="block" type="submit" [disabled]="loading">
+        <ion-spinner *ngIf="loading" name="crescent"></ion-spinner>
+        <span *ngIf="!loading">Entrar al sistema</span>
+      </ion-button>
+    </form>
+  </main>
 </ion-content>
