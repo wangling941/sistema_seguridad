@@ -7,11 +7,9 @@ import { Prisma } from "@prisma/client";
 export class PrismaAccessLogRepository implements IAccessLogRepository {
   async findAll(search?: string, page: number = 1, limit: number = 20) {
     const skip = (page - 1) * limit;
-    // Construir condición de búsqueda
     let where: Prisma.AccessLogWhereInput = {};
 
     if (search) {
-      // Intentar parsear como número para buscar por ID
       const idNum = parseInt(search);
       const idCondition: Prisma.AccessLogWhereInput | undefined = isNaN(idNum)
         ? undefined
@@ -22,6 +20,7 @@ export class PrismaAccessLogRepository implements IAccessLogRepository {
           idCondition,
           { resident: { name: { contains: search, mode: "insensitive" } } },
           { vehicle: { plate: { contains: search, mode: "insensitive" } } },
+          { visitor: { name: { contains: search, mode: "insensitive" } } },
         ].filter((cond): cond is Prisma.AccessLogWhereInput => Boolean(cond)),
       };
     }
@@ -35,6 +34,7 @@ export class PrismaAccessLogRepository implements IAccessLogRepository {
         include: {
           resident: true,
           vehicle: true,
+          visitor: true,
         },
       }),
       prisma.accessLog.count({ where }),
@@ -46,6 +46,7 @@ export class PrismaAccessLogRepository implements IAccessLogRepository {
           id: a.id,
           residentId: a.residentId,
           vehicleId: a.vehicleId,
+          visitorId: a.visitorId, // <-- CORREGIDO
           entryDatetime: a.entryDatetime,
           exitDatetime: a.exitDatetime,
           createdAt: a.createdAt,
@@ -56,9 +57,20 @@ export class PrismaAccessLogRepository implements IAccessLogRepository {
   }
 
   async findById(id: number): Promise<AccessLog | null> {
-    const data = await prisma.accessLog.findUnique({ where: { id } });
+    const data = await prisma.accessLog.findUnique({
+      where: { id },
+      include: { resident: true, vehicle: true, visitor: true },
+    });
     if (!data) return null;
-    return AccessLog.fromPrimitives(data);
+    return AccessLog.fromPrimitives({
+      id: data.id,
+      residentId: data.residentId,
+      vehicleId: data.vehicleId,
+      visitorId: data.visitorId, // <-- CORREGIDO
+      entryDatetime: data.entryDatetime,
+      exitDatetime: data.exitDatetime,
+      createdAt: data.createdAt,
+    });
   }
 
   async create(accessLog: AccessLog): Promise<AccessLog> {
@@ -66,11 +78,21 @@ export class PrismaAccessLogRepository implements IAccessLogRepository {
       data: {
         residentId: accessLog.residentId,
         vehicleId: accessLog.vehicleId,
+        visitorId: accessLog.visitorId,
         entryDatetime: accessLog.entryDatetime,
         exitDatetime: accessLog.exitDatetime,
       },
+      include: { resident: true, vehicle: true, visitor: true },
     });
-    return AccessLog.fromPrimitives(data);
+    return AccessLog.fromPrimitives({
+      id: data.id,
+      residentId: data.residentId,
+      vehicleId: data.vehicleId,
+      visitorId: data.visitorId, // <-- CORREGIDO
+      entryDatetime: data.entryDatetime,
+      exitDatetime: data.exitDatetime,
+      createdAt: data.createdAt,
+    });
   }
 
   async update(id: number, accessLog: Partial<AccessLog>): Promise<AccessLog> {
@@ -79,11 +101,21 @@ export class PrismaAccessLogRepository implements IAccessLogRepository {
       data: {
         residentId: accessLog.residentId,
         vehicleId: accessLog.vehicleId,
+        visitorId: accessLog.visitorId,
         entryDatetime: accessLog.entryDatetime,
         exitDatetime: accessLog.exitDatetime,
       },
+      include: { resident: true, vehicle: true, visitor: true },
     });
-    return AccessLog.fromPrimitives(data);
+    return AccessLog.fromPrimitives({
+      id: data.id,
+      residentId: data.residentId,
+      vehicleId: data.vehicleId,
+      visitorId: data.visitorId, // <-- CORREGIDO
+      entryDatetime: data.entryDatetime,
+      exitDatetime: data.exitDatetime,
+      createdAt: data.createdAt,
+    });
   }
 
   async delete(id: number): Promise<void> {
@@ -104,6 +136,7 @@ export class PrismaAccessLogRepository implements IAccessLogRepository {
       include: {
         resident: true,
         vehicle: true,
+        visitor: true,
       },
     });
     return data.map((a) =>
@@ -111,14 +144,13 @@ export class PrismaAccessLogRepository implements IAccessLogRepository {
         id: a.id,
         residentId: a.residentId,
         vehicleId: a.vehicleId,
+        visitorId: a.visitorId, // <-- CORREGIDO
         entryDatetime: a.entryDatetime,
         exitDatetime: a.exitDatetime,
         createdAt: a.createdAt,
       }),
     );
   }
-
-  // Consultas raw adaptadas a PostgreSQL
 
   async getAccessesPerDay(
     startDate: Date,
@@ -210,6 +242,7 @@ export class PrismaAccessLogRepository implements IAccessLogRepository {
         include: {
           resident: true,
           vehicle: true,
+          visitor: true,
         },
       }),
       prisma.accessLog.count({ where }),
@@ -221,6 +254,7 @@ export class PrismaAccessLogRepository implements IAccessLogRepository {
           id: a.id,
           residentId: a.residentId,
           vehicleId: a.vehicleId,
+          visitorId: a.visitorId, // <-- CORREGIDO
           entryDatetime: a.entryDatetime,
           exitDatetime: a.exitDatetime,
           createdAt: a.createdAt,

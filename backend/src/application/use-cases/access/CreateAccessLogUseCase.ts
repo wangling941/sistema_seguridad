@@ -14,16 +14,17 @@ export class CreateAccessLogUseCase {
       undefined,
       dto.residentId || null,
       dto.vehicleId || null,
+      dto.visitorId || null,
       dto.entryDatetime || new Date(),
     );
 
     const created = await this.accessLogRepository.create(accessLog);
 
-    // Emitir evento para notificaciones
     this.eventEmitter.emit("access.created", {
       accessLogId: created.id,
       residentId: created.residentId,
       vehicleId: created.vehicleId,
+      visitorId: created.visitorId,
       entryDatetime: created.entryDatetime,
     });
 

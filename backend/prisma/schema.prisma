@@ -47,19 +47,21 @@ model Visitor {
   lastEntry       DateTime? @map("last_entry")
   lastExit        DateTime? @map("last_exit")
   createdAt       DateTime @default(now())
+  accessLogs      AccessLog[]  
 }
 
 model AccessLog {
   id              Int      @id @default(autoincrement())
   residentId      Int?     @map("resident_id")
   vehicleId       Int?     @map("vehicle_id")
+  visitorId       Int?     @map("visitor_id")   
   entryDatetime   DateTime @map("entry_datetime")
   exitDatetime    DateTime? @map("exit_datetime")
   createdAt       DateTime @default(now())
   resident        Resident? @relation(fields: [residentId], references: [id], onDelete: SetNull)
   vehicle         Vehicle?  @relation(fields: [vehicleId], references: [id], onDelete: SetNull)
+  visitor         Visitor?  @relation(fields: [visitorId], references: [id], onDelete: SetNull) 
 }
-
 model ExportLog {
   id           Int      @id @default(autoincrement())
   userId       Int?     @map("user_id")
