@@ -12,7 +12,7 @@
     "emitDecoratorMetadata": true,
     "resolveJsonModule": true,
     "baseUrl": ".",
-    "types": ["node"], // <--- Agrega esta línea
+    "types": ["node"],
     "paths": {
       "@domain/*": ["src/domain/*"],
       "@application/*": ["src/application/*"],
