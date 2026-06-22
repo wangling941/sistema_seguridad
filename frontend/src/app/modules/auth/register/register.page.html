@@ -1,14 +1,14 @@
-<ion-content class="login-page" scroll="false">
-  <div class="login-background">
-    <div class="login-overlay"></div>
-    <div class="login-container animate-in">
+<ion-content class="register-page" scroll="false">
+  <div class="register-background">
+    <div class="register-overlay"></div>
+    <div class="register-container animate-in">
       <div class="brand">
         <img src="assets/logo.svg" alt="Logo" class="logo" />
-        <h1>Sistema Seguridad</h1>
-        <p>Paraíso Verde</p>
+        <h1>Crear cuenta</h1>
+        <p>Regístrate para acceder al sistema</p>
       </div>
 
-      <form (ngSubmit)="login()" #loginForm="ngForm">
+      <form (ngSubmit)="register()" #registerForm="ngForm">
         <ion-item>
           <ion-icon slot="start" name="person-outline"></ion-icon>
           <ion-input
@@ -30,15 +30,26 @@
             required
           ></ion-input>
         </ion-item>
+        <ion-item>
+          <ion-icon slot="start" name="lock-closed-outline"></ion-icon>
+          <ion-input
+            label="Confirmar contraseña"
+            labelPlacement="stacked"
+            [(ngModel)]="confirmPassword"
+            name="confirmPassword"
+            type="password"
+            required
+          ></ion-input>
+        </ion-item>
 
         <ion-button expand="block" type="submit" [disabled]="loading">
           <ion-spinner *ngIf="loading" name="crescent"></ion-spinner>
-          <span *ngIf="!loading">Ingresar</span>
+          <span *ngIf="!loading">Registrarse</span>
         </ion-button>
 
-        <div class="register-link">
-          <span>¿No tienes cuenta? </span>
-          <a (click)="goToRegister()">Regístrate aquí</a>
+        <div class="login-link">
+          <span>¿Ya tienes cuenta? </span>
+          <a (click)="goToLogin()">Inicia sesión</a>
         </div>
       </form>
     </div>

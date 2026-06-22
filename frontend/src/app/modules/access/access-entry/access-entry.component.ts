@@ -4,11 +4,9 @@ import { Component, OnInit } from '@angular/core';
   selector: 'app-access-entry',
   templateUrl: './access-entry.component.html',
   styleUrls: ['./access-entry.component.scss'],
+  standalone: false,
 })
-export class AccessEntryComponent  implements OnInit {
-
-  constructor() { }
-
+export class AccessEntryComponent implements OnInit {
+  constructor() {}
   ngOnInit() {}
-
 }

@@ -9,7 +9,7 @@ import { Api } from '../../../core/services/api';
   standalone: false,
 })
 export class ReportsPage implements OnInit {
-  logs: AccessLog[] = [];
+  logs: AccessLog[] = []; // inicializado vacío
   total = 0;
   filters = {
     startDate: '',
@@ -18,21 +18,32 @@ export class ReportsPage implements OnInit {
     vehiclePlate: '',
   };
 
-  constructor(private api: Api) { }
+  constructor(private api: Api) {}
 
   ngOnInit() {
     this.load();
   }
 
   load(): void {
-    this.api.getReport({ ...this.filters, page: 1, limit: 100 }).subscribe((result) => {
-      this.logs = result.data;
-      this.total = result.total;
+    this.api.getReport({ ...this.filters, page: 1, limit: 100 }).subscribe({
+      next: (result) => {
+        this.logs = result.data || [];
+        this.total = result.total || 0;
+      },
+      error: () => {
+        this.logs = [];
+        this.total = 0;
+      },
     });
   }
 
   clear(): void {
-    this.filters = { startDate: '', endDate: '', residentId: null, vehiclePlate: '' };
+    this.filters = {
+      startDate: '',
+      endDate: '',
+      residentId: null,
+      vehiclePlate: '',
+    };
     this.load();
   }
 }

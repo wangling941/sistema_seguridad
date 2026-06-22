@@ -10,14 +10,22 @@ import { Notification } from './core/services/notification';
   standalone: false,
 })
 export class AppComponent {
-  readonly pages = [
+  principalPages = [
     { title: 'Panel', url: '/dashboard', icon: 'grid-outline' },
+  ];
+  managementPages = [
     { title: 'Residentes', url: '/residents', icon: 'people-outline' },
-    { title: 'Vehiculos', url: '/vehicles', icon: 'car-outline' },
+    { title: 'Vehículos', url: '/vehicles', icon: 'car-outline' },
     { title: 'Visitantes', url: '/visitors', icon: 'person-add-outline' },
     { title: 'Accesos', url: '/access', icon: 'log-in-outline' },
+  ];
+  analysisPages = [
     { title: 'Reportes', url: '/reports', icon: 'bar-chart-outline' },
-    { title: 'Notificaciones', url: '/notifications', icon: 'notifications-outline' },
+    {
+      title: 'Notificaciones',
+      url: '/notifications',
+      icon: 'notifications-outline',
+    },
   ];
 
   constructor(

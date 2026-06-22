@@ -1,8 +1,13 @@
 import { Component, OnInit } from '@angular/core';
-import { AlertController, ToastController } from '@ionic/angular';
+import {
+  AlertController,
+  ModalController,
+  ToastController,
+} from '@ionic/angular';
 import { finalize } from 'rxjs';
 import { Resident } from '../../../core/models';
 import { Api } from '../../../core/services/api';
+import { ResidentFormComponent } from '../resident-form/resident-form.component';
 
 @Component({
   selector: 'app-residents',
@@ -15,14 +20,13 @@ export class ResidentsPage implements OnInit {
   total = 0;
   search = '';
   loading = false;
-  editingId: number | null = null;
-  form: Partial<Resident> = { name: '', dni: '', status: 'active' };
 
   constructor(
     private api: Api,
+    private modalController: ModalController,
     private alertController: AlertController,
     private toastController: ToastController,
-  ) { }
+  ) {}
 
   ngOnInit() {
     this.load();
@@ -30,7 +34,8 @@ export class ResidentsPage implements OnInit {
 
   load(): void {
     this.loading = true;
-    this.api.getResidents(this.search, 1, 50)
+    this.api
+      .getResidents(this.search, 1, 50)
       .pipe(finalize(() => (this.loading = false)))
       .subscribe((result) => {
         this.residents = result.data;
@@ -38,41 +43,19 @@ export class ResidentsPage implements OnInit {
       });
   }
 
-  save(): void {
-    const payload = {
-      name: this.form.name?.trim(),
-      dni: this.form.dni?.trim(),
-      status: this.form.status || 'active',
-    };
-
-    const request = this.editingId
-      ? this.api.updateResident(this.editingId, payload)
-      : this.api.createResident(payload);
-
-    request.subscribe({
-      next: () => {
-        this.resetForm();
-        this.load();
-        this.toast(this.editingId ? 'Residente actualizado' : 'Residente creado');
-      },
-      error: () => this.toast('No se pudo guardar el residente', 'danger'),
+  async openForm(resident?: Resident): Promise<void> {
+    const modal = await this.modalController.create({
+      component: ResidentFormComponent,
+      componentProps: { resident },
     });
+    modal.onWillDismiss().then(() => this.load());
+    await modal.present();
   }
 
-  edit(resident: Resident): void {
-    this.editingId = resident.id;
-    this.form = { ...resident };
-  }
-
-  resetForm(): void {
-    this.editingId = null;
-    this.form = { name: '', dni: '', status: 'active' };
-  }
-
-  async remove(resident: Resident): Promise<void> {
+  async deleteResident(resident: Resident): Promise<void> {
     const alert = await this.alertController.create({
       header: 'Eliminar residente',
-      message: `Se eliminara a ${resident.name}.`,
+      message: `¿Estás seguro de eliminar a <strong>${resident.name}</strong>?`,
       buttons: [
         { text: 'Cancelar', role: 'cancel' },
         {
@@ -81,8 +64,8 @@ export class ResidentsPage implements OnInit {
           handler: () => {
             this.api.deleteResident(resident.id).subscribe({
               next: () => {
+                this.toast('Residente eliminado', 'success');
                 this.load();
-                this.toast('Residente eliminado');
               },
               error: () => this.toast('No se pudo eliminar', 'danger'),
             });
@@ -93,8 +76,16 @@ export class ResidentsPage implements OnInit {
     await alert.present();
   }
 
-  private async toast(message: string, color: 'success' | 'danger' = 'success'): Promise<void> {
-    const toast = await this.toastController.create({ message, color, duration: 2200, position: 'top' });
+  private async toast(
+    message: string,
+    color: 'success' | 'danger' = 'success',
+  ) {
+    const toast = await this.toastController.create({
+      message,
+      color,
+      duration: 2200,
+      position: 'top',
+    });
     await toast.present();
   }
 }

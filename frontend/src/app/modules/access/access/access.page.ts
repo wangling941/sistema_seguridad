@@ -17,25 +17,27 @@ export class AccessPage implements OnInit {
   search = '';
   total = 0;
   loading = false;
-  form: Partial<AccessLog> = {
-    residentId: null,
-    vehicleId: null,
-  };
+  form: Partial<AccessLog> = { residentId: null, vehicleId: null };
 
   constructor(
     private api: Api,
     private toastController: ToastController,
-  ) { }
+  ) {}
 
   ngOnInit() {
     this.load();
-    this.api.getResidents('', 1, 200).subscribe((result) => (this.residents = result.data));
-    this.api.getVehicles('', 1, 200).subscribe((result) => (this.vehicles = result.data));
+    this.api
+      .getResidents('', 1, 200)
+      .subscribe((res) => (this.residents = res.data));
+    this.api
+      .getVehicles('', 1, 200)
+      .subscribe((res) => (this.vehicles = res.data));
   }
 
-  load(): void {
+  load() {
     this.loading = true;
-    this.api.getAccessLogs(this.search, 1, 50)
+    this.api
+      .getAccessLogs(this.search, 1, 50)
       .pipe(finalize(() => (this.loading = false)))
       .subscribe((result) => {
         this.logs = result.data;
@@ -43,43 +45,50 @@ export class AccessPage implements OnInit {
       });
   }
 
-  createEntry(): void {
+  createEntry() {
     const payload = {
       residentId: this.form.residentId || null,
       vehicleId: this.form.vehicleId || null,
       entryDatetime: new Date().toISOString(),
     };
-
     this.api.createAccessLog(payload).subscribe({
       next: () => {
         this.form = { residentId: null, vehicleId: null };
         this.load();
         this.toast('Entrada registrada');
       },
-      error: () => this.toast('No se pudo registrar la entrada', 'danger'),
+      error: () => this.toast('Error al registrar entrada', 'danger'),
     });
   }
 
-  registerExit(log: AccessLog): void {
+  registerExit(log: AccessLog) {
     this.api.registerExit(log.id).subscribe({
       next: () => {
         this.load();
         this.toast('Salida registrada');
       },
-      error: () => this.toast('No se pudo registrar la salida', 'danger'),
+      error: () => this.toast('Error al registrar salida', 'danger'),
     });
   }
 
-  residentName(id: number | null): string {
-    return this.residents.find((resident) => resident.id === id)?.name || 'Sin residente';
+  getResidentName(id: number | null): string {
+    return this.residents.find((r) => r.id === id)?.name || 'Sin residente';
   }
 
-  vehiclePlate(id: number | null): string {
-    return this.vehicles.find((vehicle) => vehicle.id === id)?.plate || 'Sin vehiculo';
+  getVehiclePlate(id: number | null): string {
+    return this.vehicles.find((v) => v.id === id)?.plate || 'Sin vehículo';
   }
 
-  private async toast(message: string, color: 'success' | 'danger' = 'success'): Promise<void> {
-    const toast = await this.toastController.create({ message, color, duration: 2200, position: 'top' });
+  private async toast(
+    message: string,
+    color: 'success' | 'danger' = 'success',
+  ) {
+    const toast = await this.toastController.create({
+      message,
+      color,
+      duration: 2200,
+      position: 'top',
+    });
     await toast.present();
   }
 }

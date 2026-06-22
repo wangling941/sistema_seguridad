@@ -1,20 +1,64 @@
 <ion-app>
   <ion-split-pane contentId="main-content" when="lg">
-    <ion-menu contentId="main-content" type="overlay" *ngIf="auth.isAuthenticated()">
+    <ion-menu
+      contentId="main-content"
+      type="overlay"
+      *ngIf="auth.isAuthenticated()"
+    >
+      <ion-header>
+        <ion-toolbar color="primary">
+          <ion-title>Sistema Seguridad</ion-title>
+        </ion-toolbar>
+      </ion-header>
       <ion-content>
-        <div class="brand-panel">
-          <div class="brand-mark">SP</div>
+        <!-- Perfil del usuario -->
+        <div class="user-profile">
+          <ion-avatar>
+            <ion-icon
+              name="person-circle"
+              style="font-size: 48px; color: #0f766e"
+            ></ion-icon>
+          </ion-avatar>
           <div>
-            <h1>Paraiso Verde</h1>
-            <p>Control de seguridad</p>
+            <strong>{{ auth.currentUser?.username || "Usuario" }}</strong>
+            <p>Administrador</p>
           </div>
         </div>
 
         <ion-list lines="none">
-          <ion-menu-toggle auto-hide="false" *ngFor="let page of pages">
-            <ion-item routerDirection="root" [routerLink]="page.url" routerLinkActive="selected">
-              <ion-icon slot="start" [name]="page.icon"></ion-icon>
-              <ion-label>{{ page.title }}</ion-label>
+          <ion-list-header>Principal</ion-list-header>
+          <ion-menu-toggle auto-hide="false" *ngFor="let p of principalPages">
+            <ion-item
+              routerDirection="root"
+              [routerLink]="p.url"
+              routerLinkActive="selected"
+            >
+              <ion-icon slot="start" [name]="p.icon"></ion-icon>
+              <ion-label>{{ p.title }}</ion-label>
+            </ion-item>
+          </ion-menu-toggle>
+
+          <ion-list-header>Gestión</ion-list-header>
+          <ion-menu-toggle auto-hide="false" *ngFor="let p of managementPages">
+            <ion-item
+              routerDirection="root"
+              [routerLink]="p.url"
+              routerLinkActive="selected"
+            >
+              <ion-icon slot="start" [name]="p.icon"></ion-icon>
+              <ion-label>{{ p.title }}</ion-label>
+            </ion-item>
+          </ion-menu-toggle>
+
+          <ion-list-header>Análisis</ion-list-header>
+          <ion-menu-toggle auto-hide="false" *ngFor="let p of analysisPages">
+            <ion-item
+              routerDirection="root"
+              [routerLink]="p.url"
+              routerLinkActive="selected"
+            >
+              <ion-icon slot="start" [name]="p.icon"></ion-icon>
+              <ion-label>{{ p.title }}</ion-label>
             </ion-item>
           </ion-menu-toggle>
         </ion-list>
@@ -22,9 +66,14 @@
 
       <ion-footer>
         <ion-toolbar>
-          <ion-button fill="clear" expand="block" color="medium" (click)="logout()">
+          <ion-button
+            expand="block"
+            fill="clear"
+            color="danger"
+            (click)="logout()"
+          >
             <ion-icon slot="start" name="log-out-outline"></ion-icon>
-            Cerrar sesion
+            Cerrar sesión
           </ion-button>
         </ion-toolbar>
       </ion-footer>

@@ -1,8 +1,13 @@
 import { Component, OnInit } from '@angular/core';
-import { AlertController, ToastController } from '@ionic/angular';
+import {
+  AlertController,
+  ModalController,
+  ToastController,
+} from '@ionic/angular';
 import { finalize } from 'rxjs';
 import { Resident, Vehicle } from '../../../core/models';
 import { Api } from '../../../core/services/api';
+import { VehicleFormComponent } from '../vehicle-form/vehicle-form.component';
 
 @Component({
   selector: 'app-vehicles',
@@ -16,23 +21,25 @@ export class VehiclesPage implements OnInit {
   total = 0;
   search = '';
   loading = false;
-  editingId: number | null = null;
-  form: Partial<Vehicle> = { plate: '', residentId: null };
 
   constructor(
     private api: Api,
+    private modalController: ModalController,
     private alertController: AlertController,
     private toastController: ToastController,
-  ) { }
+  ) {}
 
   ngOnInit() {
     this.load();
-    this.api.getResidents('', 1, 200).subscribe((result) => (this.residents = result.data));
+    this.api
+      .getResidents('', 1, 200)
+      .subscribe((res) => (this.residents = res.data));
   }
 
-  load(): void {
+  load() {
     this.loading = true;
-    this.api.getVehicles(this.search, 1, 50)
+    this.api
+      .getVehicles(this.search, 1, 50)
       .pipe(finalize(() => (this.loading = false)))
       .subscribe((result) => {
         this.vehicles = result.data;
@@ -40,60 +47,53 @@ export class VehiclesPage implements OnInit {
       });
   }
 
-  save(): void {
-    const payload = {
-      plate: this.form.plate?.trim().toUpperCase(),
-      residentId: this.form.residentId || null,
-    };
-    const request = this.editingId ? this.api.updateVehicle(this.editingId, payload) : this.api.createVehicle(payload);
-    request.subscribe({
-      next: () => {
-        this.resetForm();
-        this.load();
-        this.toast(this.editingId ? 'Vehiculo actualizado' : 'Vehiculo creado');
-      },
-      error: () => this.toast('No se pudo guardar el vehiculo', 'danger'),
+  async openForm(vehicle?: Vehicle) {
+    const modal = await this.modalController.create({
+      component: VehicleFormComponent,
+      componentProps: { vehicle },
     });
+    modal.onWillDismiss().then(() => this.load());
+    await modal.present();
   }
 
-  edit(vehicle: Vehicle): void {
-    this.editingId = vehicle.id;
-    this.form = { ...vehicle };
+  getResidentName(id: number | null): string {
+    return this.residents.find((r) => r.id === id)?.name || 'Sin residente';
   }
 
-  resetForm(): void {
-    this.editingId = null;
-    this.form = { plate: '', residentId: null };
-  }
-
-  residentName(id: number | null): string {
-    return this.residents.find((resident) => resident.id === id)?.name || 'Sin residente';
-  }
-
-  async remove(vehicle: Vehicle): Promise<void> {
+  async deleteVehicle(vehicle: Vehicle) {
     const alert = await this.alertController.create({
-      header: 'Eliminar vehiculo',
-      message: `Se eliminara la placa ${vehicle.plate}.`,
+      header: 'Eliminar vehículo',
+      message: `¿Eliminar placa ${vehicle.plate}?`,
       buttons: [
         { text: 'Cancelar', role: 'cancel' },
         {
           text: 'Eliminar',
           role: 'destructive',
-          handler: () => this.api.deleteVehicle(vehicle.id).subscribe({
-            next: () => {
-              this.load();
-              this.toast('Vehiculo eliminado');
-            },
-            error: () => this.toast('No se pudo eliminar', 'danger'),
-          }),
+          handler: () => {
+            this.api.deleteVehicle(vehicle.id).subscribe({
+              next: () => {
+                this.toast('Vehículo eliminado');
+                this.load();
+              },
+              error: () => this.toast('Error al eliminar', 'danger'),
+            });
+          },
         },
       ],
     });
     await alert.present();
   }
 
-  private async toast(message: string, color: 'success' | 'danger' = 'success'): Promise<void> {
-    const toast = await this.toastController.create({ message, color, duration: 2200, position: 'top' });
+  private async toast(
+    message: string,
+    color: 'success' | 'danger' = 'success',
+  ) {
+    const toast = await this.toastController.create({
+      message,
+      color,
+      duration: 2200,
+      position: 'top',
+    });
     await toast.present();
   }
 }

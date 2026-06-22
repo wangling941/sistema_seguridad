@@ -2,61 +2,88 @@
   <ion-toolbar>
     <ion-buttons slot="start"><ion-menu-button></ion-menu-button></ion-buttons>
     <ion-title>Visitantes</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="openForm()">
+        <ion-icon slot="icon-only" name="add-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
   </ion-toolbar>
 </ion-header>
 
 <ion-content class="app-surface">
-  <div class="page-wrap">
-    <div class="page-title"><div><h1>Visitantes</h1><p>{{ total }} visitantes registrados.</p></div></div>
-    <section class="form-panel">
-      <div class="form-grid">
-        <ion-item><ion-input label="Nombre" labelPlacement="stacked" [(ngModel)]="form.name" name="name"></ion-input></ion-item>
-        <ion-item><ion-input label="DNI" labelPlacement="stacked" [(ngModel)]="form.dni" name="dni" inputmode="numeric"></ion-input></ion-item>
-        <ion-item>
-          <ion-select label="Estado" labelPlacement="stacked" [(ngModel)]="form.status" name="status">
-            <ion-select-option value="active">Activo</ion-select-option>
-            <ion-select-option value="inactive">Inactivo</ion-select-option>
-          </ion-select>
-        </ion-item>
-        <ion-item>
-          <ion-toggle [(ngModel)]="form.hasVehicle" name="hasVehicle">Tiene vehiculo</ion-toggle>
-        </ion-item>
-        <ion-item *ngIf="form.hasVehicle">
-          <ion-input label="Placa visitante" labelPlacement="stacked" [(ngModel)]="form.vehiclePlate" name="vehiclePlate"></ion-input>
-        </ion-item>
-        <ion-item>
-          <ion-input label="Acompanantes" labelPlacement="stacked" [(ngModel)]="form.companionsCount" name="companionsCount" type="number"></ion-input>
-        </ion-item>
+  <div class="page-wrap animate-in">
+    <div class="page-title">
+      <div>
+        <h1>Visitantes</h1>
+        <p>{{ total }} personas registradas</p>
       </div>
-      <div class="form-actions">
-        <ion-button fill="clear" color="medium" (click)="resetForm()">Limpiar</ion-button>
-        <ion-button (click)="save()">{{ editingId ? 'Actualizar' : 'Crear visitante' }}</ion-button>
-      </div>
-    </section>
-    <div class="toolbar-row">
-      <ion-searchbar [(ngModel)]="search" (ionInput)="load()" placeholder="Buscar por nombre o DNI"></ion-searchbar>
-      <ion-button fill="outline" (click)="load()"><ion-icon slot="start" name="refresh-outline"></ion-icon>Actualizar</ion-button>
     </div>
+
+    <div class="toolbar-row">
+      <ion-searchbar
+        [(ngModel)]="search"
+        (ionInput)="load()"
+        placeholder="Buscar por nombre o DNI"
+      ></ion-searchbar>
+      <ion-button fill="outline" (click)="load()">
+        <ion-icon slot="start" name="refresh-outline"></ion-icon>
+        Actualizar
+      </ion-button>
+    </div>
+
     <section class="data-card">
       <div class="responsive-table" *ngIf="visitors.length; else empty">
         <table>
-          <thead><tr><th>Nombre</th><th>DNI</th><th>Vehiculo</th><th>Acompanantes</th><th>Estado</th><th></th></tr></thead>
+          <thead>
+            <tr>
+              <th>Nombre</th>
+              <th>DNI</th>
+              <th>Vehículo</th>
+              <th>Acompañantes</th>
+              <th>Estado</th>
+              <th style="text-align: right">Acciones</th>
+            </tr>
+          </thead>
           <tbody>
             <tr *ngFor="let visitor of visitors">
-              <td>{{ visitor.name }}</td>
+              <td><strong>{{ visitor.name }}</strong></td>
               <td>{{ visitor.dni }}</td>
               <td>{{ visitor.hasVehicle ? visitor.vehiclePlate : 'No' }}</td>
               <td>{{ visitor.companionsCount || 0 }}</td>
-              <td><span class="status-pill" [class.inactive]="visitor.status === 'inactive'">{{ visitor.status === 'active' ? 'Activo' : 'Inactivo' }}</span></td>
+              <td>
+                <span
+                  class="status-pill"
+                  [class.inactive]="visitor.status === 'inactive'"
+                >
+                  {{ visitor.status === 'active' ? 'Activo' : 'Inactivo' }}
+                </span>
+              </td>
               <td class="actions">
-                <ion-button size="small" fill="clear" (click)="edit(visitor)"><ion-icon slot="icon-only" name="create-outline"></ion-icon></ion-button>
-                <ion-button size="small" fill="clear" color="danger" (click)="remove(visitor)"><ion-icon slot="icon-only" name="trash-outline"></ion-icon></ion-button>
+                <ion-button
+                  size="small"
+                  fill="clear"
+                  (click)="openForm(visitor)"
+                >
+                  <ion-icon slot="icon-only" name="create-outline"></ion-icon>
+                </ion-button>
+                <ion-button
+                  size="small"
+                  fill="clear"
+                  color="danger"
+                  (click)="deleteVisitor(visitor)"
+                >
+                  <ion-icon slot="icon-only" name="trash-outline"></ion-icon>
+                </ion-button>
               </td>
             </tr>
           </tbody>
         </table>
       </div>
-      <ng-template #empty><div class="empty-state">No hay visitantes para mostrar.</div></ng-template>
+      <ng-template #empty
+        ><div class="empty-state">
+          No hay visitantes registrados.
+        </div></ng-template
+      >
     </section>
   </div>
 </ion-content>

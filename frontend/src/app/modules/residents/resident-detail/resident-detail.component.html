@@ -1,3 +1,33 @@
-<p>
-  resident-detail works!
-</p>
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Detalle de residente</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="dismiss()">
+        <ion-icon name="close-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <div class="detail-content" *ngIf="resident">
+    <ion-item>
+      <ion-label><strong>Nombre</strong></ion-label>
+      <ion-text>{{ resident.name }}</ion-text>
+    </ion-item>
+    <ion-item>
+      <ion-label><strong>DNI</strong></ion-label>
+      <ion-text>{{ resident.dni }}</ion-text>
+    </ion-item>
+    <ion-item>
+      <ion-label><strong>Estado</strong></ion-label>
+      <ion-text [color]="resident.status === 'active' ? 'success' : 'danger'">
+        {{ resident.status === "active" ? "Activo" : "Inactivo" }}
+      </ion-text>
+    </ion-item>
+    <ion-item>
+      <ion-label><strong>Creado</strong></ion-label>
+      <ion-text>{{ resident.createdAt | date: "full" }}</ion-text>
+    </ion-item>
+  </div>
+</ion-content>

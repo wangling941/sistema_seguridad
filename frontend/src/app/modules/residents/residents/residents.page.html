@@ -2,63 +2,86 @@
   <ion-toolbar>
     <ion-buttons slot="start"><ion-menu-button></ion-menu-button></ion-buttons>
     <ion-title>Residentes</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="openForm()">
+        <ion-icon slot="icon-only" name="add-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
   </ion-toolbar>
 </ion-header>
 
 <ion-content class="app-surface">
-  <div class="page-wrap">
+  <div class="page-wrap animate-in">
     <div class="page-title">
       <div>
         <h1>Residentes</h1>
-        <p>{{ total }} registros conectados al backend.</p>
+        <p>{{ total }} registros en el sistema</p>
       </div>
     </div>
 
-    <section class="form-panel">
-      <div class="form-grid">
-        <ion-item>
-          <ion-input label="Nombre" labelPlacement="stacked" [(ngModel)]="form.name" name="name"></ion-input>
-        </ion-item>
-        <ion-item>
-          <ion-input label="DNI" labelPlacement="stacked" [(ngModel)]="form.dni" name="dni" inputmode="numeric"></ion-input>
-        </ion-item>
-        <ion-item>
-          <ion-select label="Estado" labelPlacement="stacked" [(ngModel)]="form.status" name="status">
-            <ion-select-option value="active">Activo</ion-select-option>
-            <ion-select-option value="inactive">Inactivo</ion-select-option>
-          </ion-select>
-        </ion-item>
-      </div>
-      <div class="form-actions">
-        <ion-button fill="clear" color="medium" (click)="resetForm()">Limpiar</ion-button>
-        <ion-button (click)="save()">{{ editingId ? 'Actualizar' : 'Crear residente' }}</ion-button>
-      </div>
-    </section>
-
     <div class="toolbar-row">
-      <ion-searchbar [(ngModel)]="search" (ionInput)="load()" placeholder="Buscar por nombre o DNI"></ion-searchbar>
-      <ion-button fill="outline" (click)="load()"><ion-icon slot="start" name="refresh-outline"></ion-icon>Actualizar</ion-button>
+      <ion-searchbar
+        [(ngModel)]="search"
+        (ionInput)="load()"
+        placeholder="Buscar por nombre o DNI"
+      ></ion-searchbar>
+      <ion-button fill="outline" (click)="load()">
+        <ion-icon slot="start" name="refresh-outline"></ion-icon>
+        Actualizar
+      </ion-button>
     </div>
 
     <section class="data-card">
       <div class="responsive-table" *ngIf="residents.length; else empty">
         <table>
-          <thead><tr><th>Nombre</th><th>DNI</th><th>Estado</th><th>Creado</th><th></th></tr></thead>
+          <thead>
+            <tr>
+              <th>Nombre</th>
+              <th>DNI</th>
+              <th>Estado</th>
+              <th>Creado</th>
+              <th style="text-align: right">Acciones</th>
+            </tr>
+          </thead>
           <tbody>
             <tr *ngFor="let resident of residents">
-              <td>{{ resident.name }}</td>
+              <td><strong>{{ resident.name }}</strong></td>
               <td>{{ resident.dni }}</td>
-              <td><span class="status-pill" [class.inactive]="resident.status === 'inactive'">{{ resident.status === 'active' ? 'Activo' : 'Inactivo' }}</span></td>
+              <td>
+                <span
+                  class="status-pill"
+                  [class.inactive]="resident.status === 'inactive'"
+                >
+                  {{ resident.status === 'active' ? 'Activo' : 'Inactivo' }}
+                </span>
+              </td>
               <td>{{ resident.createdAt | date:'short' }}</td>
               <td class="actions">
-                <ion-button size="small" fill="clear" (click)="edit(resident)"><ion-icon slot="icon-only" name="create-outline"></ion-icon></ion-button>
-                <ion-button size="small" fill="clear" color="danger" (click)="remove(resident)"><ion-icon slot="icon-only" name="trash-outline"></ion-icon></ion-button>
+                <ion-button
+                  size="small"
+                  fill="clear"
+                  (click)="openForm(resident)"
+                >
+                  <ion-icon slot="icon-only" name="create-outline"></ion-icon>
+                </ion-button>
+                <ion-button
+                  size="small"
+                  fill="clear"
+                  color="danger"
+                  (click)="deleteResident(resident)"
+                >
+                  <ion-icon slot="icon-only" name="trash-outline"></ion-icon>
+                </ion-button>
               </td>
             </tr>
           </tbody>
         </table>
       </div>
-      <ng-template #empty><div class="empty-state">No hay residentes para mostrar.</div></ng-template>
+      <ng-template #empty
+        ><div class="empty-state">
+          No hay residentes para mostrar.
+        </div></ng-template
+      >
     </section>
   </div>
 </ion-content>

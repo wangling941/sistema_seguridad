@@ -1,3 +1,36 @@
-<p>
-  vehicle-form works!
-</p>
+<ion-header>
+  <ion-toolbar>
+    <ion-title>{{ vehicle ? "Editar" : "Nuevo" }} vehículo</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="dismiss()">
+        <ion-icon name="close-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <form [formGroup]="form" (ngSubmit)="save()">
+    <ion-item>
+      <ion-label position="floating">Placa</ion-label>
+      <ion-input formControlName="plate"></ion-input>
+    </ion-item>
+    <ion-item>
+      <ion-label>Residente</ion-label>
+      <ion-select formControlName="residentId">
+        <ion-select-option [value]="null">Sin residente</ion-select-option>
+        <ion-select-option *ngFor="let r of residents" [value]="r.id">{{
+          r.name
+        }}</ion-select-option>
+      </ion-select>
+    </ion-item>
+    <div class="form-actions" style="padding: 16px">
+      <ion-button fill="clear" color="medium" (click)="dismiss()"
+        >Cancelar</ion-button
+      >
+      <ion-button type="submit" [disabled]="form.invalid">
+        {{ vehicle ? "Actualizar" : "Crear" }}
+      </ion-button>
+    </div>
+  </form>
+</ion-content>

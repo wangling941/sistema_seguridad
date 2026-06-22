@@ -1,56 +1,70 @@
-.metric-card {
+.stats-grid {
   display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 20px;
+
+  @media (max-width: 768px) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .stat-card {
+    margin: 0;
+    border-radius: 16px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+    text-align: center;
+    ion-card-content {
+      padding: 20px 16px;
+    }
+    .stat-icon {
+      font-size: 32px;
+      color: #0f766e;
+    }
+    .stat-number {
+      font-size: 28px;
+      font-weight: 800;
+      margin: 6px 0 2px;
+      color: #0b1720;
+    }
+    .stat-label {
+      font-size: 14px;
+      color: #64748b;
+      font-weight: 600;
+    }
+  }
+}
+
+.bar-chart {
+  display: flex;
+  flex-direction: column;
   gap: 8px;
-  padding: 18px;
-}
+  margin-top: 8px;
 
-.metric-card span {
-  color: #667085;
-  font-size: 13px;
-  font-weight: 700;
-}
+  .bar-item {
+    display: grid;
+    grid-template-columns: 52px 1fr 36px;
+    gap: 10px;
+    align-items: center;
+    font-size: 13px;
 
-.metric-card strong {
-  color: #101828;
-  font-size: 34px;
-  line-height: 1;
-}
-
-.panel {
-  padding: 18px;
-}
-
-.panel h2 {
-  margin: 0 0 12px;
-  font-size: 18px;
-  font-weight: 800;
-}
-
-.bar-row {
-  display: grid;
-  grid-template-columns: 52px 1fr 36px;
-  gap: 10px;
-  align-items: center;
-  margin: 12px 0;
-}
-
-.bar-row span,
-.bar-row strong {
-  color: #475467;
-  font-size: 13px;
-}
-
-.bar-row div {
-  height: 10px;
-  overflow: hidden;
-  border-radius: 999px;
-  background: #e2e8f0;
-}
-
-.bar-row i {
-  display: block;
-  height: 100%;
-  min-width: 2px;
-  border-radius: inherit;
-  background: #0f766e;
+    .bar-label {
+      color: #475569;
+    }
+    .bar-track {
+      height: 12px;
+      background: #e9edf2;
+      border-radius: 999px;
+      overflow: hidden;
+    }
+    .bar-fill {
+      height: 100%;
+      background: #0f766e;
+      border-radius: 999px;
+      transition: width 0.4s ease;
+    }
+    .bar-value {
+      font-weight: 700;
+      color: #0b1720;
+    }
+  }
 }

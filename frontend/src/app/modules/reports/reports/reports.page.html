@@ -6,37 +6,96 @@
 </ion-header>
 
 <ion-content class="app-surface">
-  <div class="page-wrap">
-    <div class="page-title"><div><h1>Reportes</h1><p>{{ total }} resultados filtrados desde el backend.</p></div></div>
+  <div class="page-wrap animate-in">
+    <div class="page-title">
+      <div>
+        <h1>Reportes de accesos</h1>
+        <p>{{ total }} resultados filtrados</p>
+      </div>
+    </div>
+
     <section class="form-panel">
       <div class="form-grid">
-        <ion-item><ion-input label="Desde" labelPlacement="stacked" type="date" [(ngModel)]="filters.startDate" name="startDate"></ion-input></ion-item>
-        <ion-item><ion-input label="Hasta" labelPlacement="stacked" type="date" [(ngModel)]="filters.endDate" name="endDate"></ion-input></ion-item>
-        <ion-item><ion-input label="ID residente" labelPlacement="stacked" type="number" [(ngModel)]="filters.residentId" name="residentId"></ion-input></ion-item>
-        <ion-item><ion-input label="Placa" labelPlacement="stacked" [(ngModel)]="filters.vehiclePlate" name="vehiclePlate"></ion-input></ion-item>
+        <ion-item
+          ><ion-input
+            label="Desde"
+            labelPlacement="stacked"
+            type="date"
+            [(ngModel)]="filters.startDate"
+          ></ion-input
+        ></ion-item>
+        <ion-item
+          ><ion-input
+            label="Hasta"
+            labelPlacement="stacked"
+            type="date"
+            [(ngModel)]="filters.endDate"
+          ></ion-input
+        ></ion-item>
+        <ion-item
+          ><ion-input
+            label="ID residente"
+            labelPlacement="stacked"
+            type="number"
+            [(ngModel)]="filters.residentId"
+          ></ion-input
+        ></ion-item>
+        <ion-item
+          ><ion-input
+            label="Placa"
+            labelPlacement="stacked"
+            [(ngModel)]="filters.vehiclePlate"
+          ></ion-input
+        ></ion-item>
       </div>
       <div class="form-actions">
-        <ion-button fill="clear" color="medium" (click)="clear()">Limpiar</ion-button>
-        <ion-button (click)="load()"><ion-icon slot="start" name="filter-outline"></ion-icon>Filtrar</ion-button>
+        <ion-button fill="clear" color="medium" (click)="clear()"
+          >Limpiar</ion-button
+        >
+        <ion-button (click)="load()">
+          <ion-icon slot="start" name="filter-outline"></ion-icon>
+          Filtrar
+        </ion-button>
       </div>
     </section>
+
     <section class="data-card">
       <div class="responsive-table" *ngIf="logs.length; else empty">
         <table>
-          <thead><tr><th>ID</th><th>Residente</th><th>Vehiculo</th><th>Entrada</th><th>Salida</th><th>Estado</th></tr></thead>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Residente</th>
+              <th>Vehículo</th>
+              <th>Entrada</th>
+              <th>Salida</th>
+              <th>Estado</th>
+            </tr>
+          </thead>
           <tbody>
             <tr *ngFor="let log of logs">
               <td>#{{ log.id }}</td>
               <td>{{ log.residentId || 'N/A' }}</td>
               <td>{{ log.vehicleId || 'N/A' }}</td>
               <td>{{ log.entryDatetime | date:'short' }}</td>
-              <td>{{ log.exitDatetime ? (log.exitDatetime | date:'short') : 'Pendiente' }}</td>
-              <td><span class="status-pill" [class.pending]="!log.exitDatetime">{{ log.exitDatetime ? 'Completado' : 'Pendiente' }}</span></td>
+              <td>
+                {{ log.exitDatetime ? (log.exitDatetime | date:'short') :
+                'Pendiente' }}
+              </td>
+              <td>
+                <span class="status-pill" [class.pending]="!log.exitDatetime">
+                  {{ log.exitDatetime ? 'Completado' : 'Pendiente' }}
+                </span>
+              </td>
             </tr>
           </tbody>
         </table>
       </div>
-      <ng-template #empty><div class="empty-state">No hay datos con esos filtros.</div></ng-template>
+      <ng-template #empty
+        ><div class="empty-state">
+          No hay datos con esos filtros.
+        </div></ng-template
+      >
     </section>
   </div>
 </ion-content>

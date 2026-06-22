@@ -1,20 +1,19 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
-
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { IonicModule } from '@ionic/angular';
-
 import { VehiclesPageRoutingModule } from './vehicles-routing.module';
-
 import { VehiclesPage } from './vehicles.page';
+import { VehicleFormComponent } from '../vehicle-form/vehicle-form.component';
 
 @NgModule({
   imports: [
     CommonModule,
     FormsModule,
+    ReactiveFormsModule, // <-- AGREGADO
     IonicModule,
-    VehiclesPageRoutingModule
+    VehiclesPageRoutingModule,
   ],
-  declarations: [VehiclesPage]
+  declarations: [VehiclesPage, VehicleFormComponent],
 })
 export class VehiclesPageModule {}

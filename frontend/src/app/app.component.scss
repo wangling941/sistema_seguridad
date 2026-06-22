@@ -3,43 +3,45 @@ ion-menu {
   --background: #ffffff;
 }
 
-.brand-panel {
+.user-profile {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 24px 20px 16px;
+  padding: 20px 16px 16px;
+  border-bottom: 1px solid #e9edf2;
+  div {
+    strong {
+      display: block;
+      font-size: 16px;
+      color: #0b1720;
+    }
+    p {
+      margin: 2px 0 0;
+      font-size: 13px;
+      color: #64748b;
+    }
+  }
 }
 
-.brand-mark {
-  display: grid;
-  place-items: center;
-  width: 42px;
-  height: 42px;
-  border-radius: 8px;
-  background: #0f766e;
-  color: #ffffff;
-  font-weight: 800;
-}
-
-.brand-panel h1 {
-  margin: 0;
-  font-size: 18px;
-  font-weight: 800;
-}
-
-.brand-panel p {
-  margin: 3px 0 0;
-  color: #64748b;
-  font-size: 13px;
+ion-list-header {
+  padding-left: 16px;
+  margin-top: 12px;
+  font-weight: 700;
+  color: #475569;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
 }
 
 ion-item {
   --border-radius: 8px;
-  margin: 4px 12px;
-  font-weight: 600;
-}
-
-ion-item.selected {
-  --background: #e7f5f2;
-  --color: #0f766e;
+  margin: 2px 12px;
+  font-weight: 500;
+  &.selected {
+    --background: #e7f5f2;
+    --color: #0f766e;
+    ion-icon {
+      color: #0f766e;
+    }
+  }
 }

@@ -3,9 +3,9 @@
     <ion-buttons slot="start">
       <ion-menu-button></ion-menu-button>
     </ion-buttons>
-    <ion-title>Panel operativo</ion-title>
+    <ion-title>Panel de control</ion-title>
     <ion-buttons slot="end">
-      <ion-button (click)="load()">
+      <ion-button (click)="loadData()">
         <ion-icon slot="icon-only" name="refresh-outline"></ion-icon>
       </ion-button>
     </ion-buttons>
@@ -13,76 +13,98 @@
 </ion-header>
 
 <ion-content class="app-surface">
-  <div class="page-wrap">
+  <div class="page-wrap animate-in">
     <div class="page-title">
       <div>
-        <h1>Resumen en tiempo real</h1>
-        <p>Indicadores calculados desde PostgreSQL a traves del backend.</p>
+        <h1>Resumen ejecutivo</h1>
+        <p>Datos en tiempo real desde el backend</p>
       </div>
     </div>
 
-    <ion-grid fixed>
-      <ion-row>
-        <ion-col size="12" size-md="6" size-lg="3">
-          <section class="metric-card">
-            <span>Residentes</span>
-            <strong>{{ total(residentCounts) }}</strong>
-          </section>
-        </ion-col>
-        <ion-col size="12" size-md="6" size-lg="3">
-          <section class="metric-card">
-            <span>Visitantes</span>
-            <strong>{{ total(visitorCounts) }}</strong>
-          </section>
-        </ion-col>
-        <ion-col size="12" size-md="6" size-lg="3">
-          <section class="metric-card">
-            <span>Accesos recientes</span>
-            <strong>{{ recent.length }}</strong>
-          </section>
-        </ion-col>
-        <ion-col size="12" size-md="6" size-lg="3">
-          <section class="metric-card">
-            <span>Accesos abiertos</span>
-            <strong>{{ accessCounts[0]?.count || 0 }}</strong>
-          </section>
-        </ion-col>
-      </ion-row>
-    </ion-grid>
+    <!-- Cards de métricas -->
+    <div class="stats-grid">
+      <ion-card class="stat-card">
+        <ion-card-content>
+          <ion-icon name="people-outline" class="stat-icon"></ion-icon>
+          <div class="stat-number">{{ total(residentCounts) }}</div>
+          <div class="stat-label">Residentes</div>
+        </ion-card-content>
+      </ion-card>
 
-    <ion-grid fixed>
-      <ion-row>
-        <ion-col size="12" size-lg="7">
-          <section class="data-card panel">
-            <h2>Ultimos accesos</h2>
-            <ion-list lines="full" *ngIf="recent.length; else noRecent">
-              <ion-item *ngFor="let item of recent">
-                <ion-icon slot="start" name="log-in-outline"></ion-icon>
-                <ion-label>
-                  <h3>Acceso #{{ item.id }}</h3>
-                  <p>Residente {{ item.residentId || 'N/A' }} · Vehiculo {{ item.vehicleId || 'N/A' }}</p>
-                </ion-label>
-                <ion-note slot="end">{{ item.entryDatetime | date:'short' }}</ion-note>
-              </ion-item>
-            </ion-list>
-            <ng-template #noRecent>
-              <div class="empty-state">Aun no hay accesos registrados.</div>
-            </ng-template>
-          </section>
-        </ion-col>
+      <ion-card class="stat-card">
+        <ion-card-content>
+          <ion-icon name="car-outline" class="stat-icon"></ion-icon>
+          <div class="stat-number">{{ total(visitorCounts) }}</div>
+          <div class="stat-label">Visitantes</div>
+        </ion-card-content>
+      </ion-card>
 
-        <ion-col size="12" size-lg="5">
-          <section class="data-card panel">
-            <h2>Accesos ultimos 7 dias</h2>
-            <div class="bar-row" *ngFor="let day of last7Days">
-              <span>{{ day.date | date:'dd/MM' }}</span>
-              <div><i [style.width.%]="total(last7Days) ? (day.count / total(last7Days)) * 100 : 0"></i></div>
-              <strong>{{ day.count }}</strong>
+      <ion-card class="stat-card">
+        <ion-card-content>
+          <ion-icon name="log-in-outline" class="stat-icon"></ion-icon>
+          <div class="stat-number">{{ recent.length }}</div>
+          <div class="stat-label">Accesos recientes</div>
+        </ion-card-content>
+      </ion-card>
+
+      <ion-card class="stat-card">
+        <ion-card-content>
+          <ion-icon name="time-outline" class="stat-icon"></ion-icon>
+          <div class="stat-number">{{ accessCounts[0]?.count || 0 }}</div>
+          <div class="stat-label">Accesos abiertos</div>
+        </ion-card-content>
+      </ion-card>
+    </div>
+
+    <!-- Gráfico de últimos 7 días -->
+    <ion-card class="data-card">
+      <ion-card-header>
+        <ion-card-title>Accesos últimos 7 días</ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <div class="bar-chart" *ngIf="last7Days.length">
+          <div class="bar-item" *ngFor="let day of last7Days">
+            <span class="bar-label">{{ day.date | date:'dd/MM' }}</span>
+            <div class="bar-track">
+              <div
+                class="bar-fill"
+                [style.width.%]="(day.count / maxCount) * 100"
+              ></div>
             </div>
-            <div class="empty-state" *ngIf="!last7Days.length">Sin actividad registrada.</div>
-          </section>
-        </ion-col>
-      </ion-row>
-    </ion-grid>
+            <span class="bar-value">{{ day.count }}</span>
+          </div>
+        </div>
+        <div class="empty-state" *ngIf="!last7Days.length">
+          Sin actividad en los últimos 7 días.
+        </div>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- Accesos recientes -->
+    <ion-card class="data-card">
+      <ion-card-header>
+        <ion-card-title>Últimos accesos</ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <ion-list lines="full" *ngIf="recent.length; else noRecent">
+          <ion-item *ngFor="let item of recent">
+            <ion-icon slot="start" name="log-in-outline"></ion-icon>
+            <ion-label>
+              <h3>Acceso #{{ item.id }}</h3>
+              <p>
+                Residente {{ item.residentId || 'N/A' }} · Vehículo {{
+                item.vehicleId || 'N/A' }}
+              </p>
+            </ion-label>
+            <ion-note slot="end"
+              >{{ item.entryDatetime | date:'short' }}</ion-note
+            >
+          </ion-item>
+        </ion-list>
+        <ng-template #noRecent>
+          <div class="empty-state">Aún no hay accesos registrados.</div>
+        </ng-template>
+      </ion-card-content>
+    </ion-card>
   </div>
 </ion-content>

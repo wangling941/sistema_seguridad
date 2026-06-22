@@ -1,9 +1,8 @@
-.login-page {
+.register-page {
   --background: none;
   height: 100%;
 }
-
-.login-background {
+.register-background {
   position: relative;
   height: 100%;
   width: 100%;
@@ -12,15 +11,13 @@
   align-items: center;
   justify-content: center;
 }
-
-.login-overlay {
+.register-overlay {
   position: absolute;
   inset: 0;
   background: rgba(0, 0, 0, 0.55);
   backdrop-filter: blur(2px);
 }
-
-.login-container {
+.register-container {
   position: relative;
   z-index: 2;
   max-width: 400px;
@@ -30,7 +27,6 @@
   border-radius: 20px;
   box-shadow: 0 24px 80px rgba(0, 0, 0, 0.35);
   text-align: center;
-
   .brand {
     margin-bottom: 28px;
     .logo {
@@ -48,22 +44,19 @@
       font-size: 14px;
     }
   }
-
   ion-item {
     --background: #f8fafc;
     --border-radius: 10px;
     margin-bottom: 14px;
     --padding-start: 12px;
   }
-
   ion-button {
     margin-top: 10px;
     --border-radius: 30px;
     min-height: 48px;
     font-weight: 700;
   }
-
-  .register-link {
+  .login-link {
     margin-top: 18px;
     font-size: 14px;
     a {
