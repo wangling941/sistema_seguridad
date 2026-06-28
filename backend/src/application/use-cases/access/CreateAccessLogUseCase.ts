@@ -2,6 +2,7 @@ import { IAccessLogRepository } from "../../ports/repositories/IAccessLogReposit
 import { CreateAccessLogDto } from "../../dto/CreateAccessLogDto";
 import { AccessLog } from "../../../domain/entities/AccessLog";
 import { IEventEmitter } from "../../ports/services/IEventEmitter";
+import { ValidationError } from "../../../domain/exceptions/DomainError";
 
 export class CreateAccessLogUseCase {
   constructor(
@@ -10,6 +11,13 @@ export class CreateAccessLogUseCase {
   ) {}
 
   async execute(dto: CreateAccessLogDto): Promise<AccessLog> {
+    // VALIDACIÓN: Debe tener al menos un ID (residente, vehículo o visitante)
+    if (!dto.residentId && !dto.vehicleId && !dto.visitorId) {
+      throw new ValidationError(
+        "Debe proporcionar al menos un residente, vehículo o visitante",
+      );
+    }
+
     const accessLog = new AccessLog(
       undefined,
       dto.residentId || null,

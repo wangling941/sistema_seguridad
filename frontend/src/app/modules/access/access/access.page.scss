@@ -2,3 +2,90 @@
   padding: 16px;
   margin-bottom: 14px;
 }
+
+// --- RESPONSIVE: Mejoras para móviles ---
+
+@media (max-width: 768px) {
+  .page-wrap {
+    padding: 12px 8px 20px;
+  }
+
+  .page-title h1 {
+    font-size: 22px;
+  }
+  .page-title p {
+    font-size: 13px;
+  }
+
+  .form-grid {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .form-actions {
+    flex-direction: column;
+    gap: 8px;
+    ion-button {
+      width: 100%;
+      margin: 0;
+    }
+  }
+
+  .toolbar-row {
+    flex-direction: column;
+    gap: 8px;
+    ion-searchbar {
+      width: 100%;
+    }
+    ion-button {
+      width: 100%;
+    }
+  }
+
+  // Ocultar columnas menos importantes en móvil
+  .responsive-table {
+    .hide-mobile {
+      display: none !important;
+    }
+    table {
+      min-width: 480px;
+      font-size: 13px;
+    }
+    th,
+    td {
+      padding: 8px 10px;
+    }
+    .actions {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      ion-button {
+        --padding-start: 6px;
+        --padding-end: 6px;
+        --min-height: 28px;
+        font-size: 11px;
+      }
+    }
+  }
+}
+
+// Mejoras para pantallas muy pequeñas
+@media (max-width: 480px) {
+  .responsive-table {
+    table {
+      min-width: 380px;
+      font-size: 11px;
+    }
+    th,
+    td {
+      padding: 6px 6px;
+    }
+    .status-pill {
+      font-size: 10px;
+      padding: 1px 8px;
+    }
+    .actions ion-button {
+      font-size: 10px;
+    }
+  }
+}

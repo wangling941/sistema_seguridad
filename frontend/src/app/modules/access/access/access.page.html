@@ -104,10 +104,10 @@
           <thead>
             <tr>
               <th>ID</th>
-              <th>Residente</th>
-              <th>Vehículo</th>
+              <th class="hide-mobile">Residente</th>
+              <th class="hide-mobile">Vehículo</th>
               <th>Visitante</th>
-              <th>Entrada</th>
+              <th class="hide-mobile">Entrada</th>
               <th>Salida</th>
               <th>Estado</th>
               <th style="text-align: right">Acciones</th>
@@ -116,10 +116,12 @@
           <tbody>
             <tr *ngFor="let log of logs">
               <td>#{{ log.id }}</td>
-              <td>{{ getResidentName(log.residentId) }}</td>
-              <td>{{ getVehiclePlate(log.vehicleId) }}</td>
+              <td class="hide-mobile">{{ getResidentName(log.residentId) }}</td>
+              <td class="hide-mobile">{{ getVehiclePlate(log.vehicleId) }}</td>
               <td>{{ getVisitorName(log.visitorId) }}</td>
-              <td>{{ log.entryDatetime | date:'short' }}</td>
+              <td class="hide-mobile">
+                {{ log.entryDatetime | date:'short' }}
+              </td>
               <td>
                 {{ log.exitDatetime ? (log.exitDatetime | date:'short') :
                 'Pendiente' }}
@@ -137,6 +139,14 @@
                 >
                   <ion-icon slot="start" name="log-out-outline"></ion-icon>
                   Salida
+                </ion-button>
+                <ion-button
+                  size="small"
+                  color="danger"
+                  fill="clear"
+                  (click)="deleteAccess(log)"
+                >
+                  <ion-icon slot="icon-only" name="trash-outline"></ion-icon>
                 </ion-button>
               </td>
             </tr>

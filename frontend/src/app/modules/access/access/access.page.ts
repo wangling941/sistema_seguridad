@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { ToastController } from '@ionic/angular';
+import { AlertController, ToastController } from '@ionic/angular';
 import { finalize } from 'rxjs';
 import { AccessLog, Resident, Vehicle, Visitor } from '../../../core/models';
 import { Api } from '../../../core/services/api';
@@ -34,6 +34,7 @@ export class AccessPage implements OnInit {
   constructor(
     private api: Api,
     private toastController: ToastController,
+    private alertController: AlertController,
   ) {}
 
   ngOnInit() {
@@ -84,10 +85,18 @@ export class AccessPage implements OnInit {
   }
 
   createEntry() {
-    // Validación: si es visitante, debe seleccionar uno
-    if (this.entryType === 'visitor' && !this.form.visitorId) {
-      this.toast('Selecciona un visitante', 'warning');
-      return;
+    // VALIDACIÓN: Debe seleccionar al menos un elemento (residente, vehículo o visitante)
+    if (this.entryType === 'visitor') {
+      if (!this.form.visitorId) {
+        this.toast('Debes seleccionar un visitante', 'warning');
+        return;
+      }
+    } else {
+      // Para residente o vehículo: debe tener al menos residente o vehículo
+      if (!this.form.residentId && !this.form.vehicleId) {
+        this.toast('Debes seleccionar un residente o un vehículo', 'warning');
+        return;
+      }
     }
 
     const payload: any = {
@@ -107,11 +116,15 @@ export class AccessPage implements OnInit {
         this.load();
         this.toast('Entrada registrada');
       },
-      error: () => this.toast('Error al registrar entrada', 'danger'),
+      error: (err) => {
+        console.error('Error al registrar entrada:', err);
+        this.toast('Error al registrar entrada', 'danger');
+      },
     });
   }
 
   registerExit(log: AccessLog) {
+    if (!log.id) return;
     this.api.registerExit(log.id).subscribe({
       next: () => {
         this.load();
@@ -119,6 +132,31 @@ export class AccessPage implements OnInit {
       },
       error: () => this.toast('Error al registrar salida', 'danger'),
     });
+  }
+
+  async deleteAccess(log: AccessLog) {
+    if (!log.id) return;
+    const alert = await this.alertController.create({
+      header: 'Eliminar acceso',
+      message: `¿Estás seguro de eliminar el acceso #${log.id}? Esta acción no se puede deshacer.`,
+      buttons: [
+        { text: 'Cancelar', role: 'cancel' },
+        {
+          text: 'Eliminar',
+          role: 'destructive',
+          handler: () => {
+            this.api.deleteAccessLog(log.id).subscribe({
+              next: () => {
+                this.load();
+                this.toast('Acceso eliminado');
+              },
+              error: () => this.toast('Error al eliminar', 'danger'),
+            });
+          },
+        },
+      ],
+    });
+    await alert.present();
   }
 
   getResidentName(id: number | null): string {
