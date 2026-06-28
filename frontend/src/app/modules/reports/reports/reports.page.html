@@ -101,23 +101,38 @@
       </div>
     </section>
 
-    <!-- Gráficos -->
-    <section
-      class="charts-section"
-      *ngIf="!loading && logs.length > 0 && perDay.length > 0"
-    >
+    <!-- Sección de gráficos (4 tarjetas) -->
+    <section class="charts-grid" *ngIf="!loading && logs.length > 0">
+      <!-- Gráfico 1: Accesos por día -->
       <div class="chart-card">
         <h4>Accesos por día</h4>
-        <canvas #dayChart></canvas>
+        <div class="chart-wrapper">
+          <canvas #dayChart></canvas>
+        </div>
       </div>
-    </section>
-    <section
-      class="charts-section"
-      *ngIf="!loading && logs.length > 0 && perResident.length > 0"
-    >
+
+      <!-- Gráfico 2: Accesos por residente -->
       <div class="chart-card">
         <h4>Accesos por residente</h4>
-        <canvas #residentChart></canvas>
+        <div class="chart-wrapper">
+          <canvas #residentChart></canvas>
+        </div>
+      </div>
+
+      <!-- Gráfico 3: Accesos por hora del día -->
+      <div class="chart-card">
+        <h4>Accesos por hora</h4>
+        <div class="chart-wrapper">
+          <canvas #hourChart></canvas>
+        </div>
+      </div>
+
+      <!-- Gráfico 4: Top 5 visitantes -->
+      <div class="chart-card">
+        <h4>Top 5 visitantes</h4>
+        <div class="chart-wrapper">
+          <canvas #visitorChart></canvas>
+        </div>
       </div>
     </section>
 

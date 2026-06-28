@@ -24,6 +24,9 @@ Chart.register(...registerables);
 export class ReportsPage implements OnInit, AfterViewInit {
   @ViewChild('dayChart') dayChartRef!: ElementRef<HTMLCanvasElement>;
   @ViewChild('residentChart') residentChartRef!: ElementRef<HTMLCanvasElement>;
+  // Nuevos gráficos
+  @ViewChild('hourChart') hourChartRef!: ElementRef<HTMLCanvasElement>;
+  @ViewChild('visitorChart') visitorChartRef!: ElementRef<HTMLCanvasElement>;
 
   logs: AccessLog[] = [];
   total = 0;
@@ -32,6 +35,9 @@ export class ReportsPage implements OnInit, AfterViewInit {
   visitors: Visitor[] = [];
   perDay: any[] = [];
   perResident: any[] = [];
+  // Nuevas propiedades
+  perHour: any[] = [];
+  topVisitors: any[] = [];
 
   filters = {
     startDate: '',
@@ -54,6 +60,8 @@ export class ReportsPage implements OnInit, AfterViewInit {
 
   private dayChart: Chart | null = null;
   private residentChart: Chart | null = null;
+  private hourChart: Chart | null = null;
+  private visitorChart: Chart | null = null;
   private searchTimeout: any;
 
   constructor(
@@ -68,7 +76,7 @@ export class ReportsPage implements OnInit, AfterViewInit {
   }
 
   ngAfterViewInit() {
-    // Se llama después de la vista, pero los gráficos se renderizan cuando los datos llegan
+    // Los gráficos se renderizan cuando llegan los datos
   }
 
   loadSelects() {
@@ -84,7 +92,6 @@ export class ReportsPage implements OnInit, AfterViewInit {
   }
 
   load() {
-    // Validar fechas
     if (this.filters.startDate && this.filters.endDate) {
       const start = new Date(this.filters.startDate);
       const end = new Date(this.filters.endDate);
@@ -112,11 +119,13 @@ export class ReportsPage implements OnInit, AfterViewInit {
 
     this.api.getReport(params).subscribe({
       next: (result: any) => {
-        // Extraer datos del backend
         this.logs = result.logs?.data || [];
         this.total = result.logs?.total || 0;
         this.perDay = result.perDay || [];
         this.perResident = result.perResident || [];
+
+        // Calcular datos para nuevos gráficos a partir de los logs
+        this.calculateExtraCharts();
 
         this.totalPages = Math.ceil(this.total / this.pageSize);
         if (this.currentPage > this.totalPages) {
@@ -127,7 +136,6 @@ export class ReportsPage implements OnInit, AfterViewInit {
 
         this.calculateSummary();
 
-        // Renderizar gráficos después de que el DOM se actualice
         setTimeout(() => {
           this.renderCharts();
         }, 200);
@@ -140,6 +148,32 @@ export class ReportsPage implements OnInit, AfterViewInit {
         this.loading = false;
       },
     });
+  }
+
+  calculateExtraCharts() {
+    // Accesos por hora (0-23)
+    const hourMap = new Map<number, number>();
+    for (let i = 0; i < 24; i++) hourMap.set(i, 0);
+    this.logs.forEach((log) => {
+      const hour = new Date(log.entryDatetime).getHours();
+      hourMap.set(hour, (hourMap.get(hour) || 0) + 1);
+    });
+    this.perHour = Array.from(hourMap.entries())
+      .map(([hour, count]) => ({ hour, count }))
+      .sort((a, b) => a.hour - b.hour);
+
+    // Top 5 visitantes (agrupando por nombre de visitante)
+    const visitorMap = new Map<string, number>();
+    this.logs.forEach((log) => {
+      const name = this.getVisitorName(log.visitorId);
+      if (name !== 'Sin visitante') {
+        visitorMap.set(name, (visitorMap.get(name) || 0) + 1);
+      }
+    });
+    this.topVisitors = Array.from(visitorMap.entries())
+      .map(([name, count]) => ({ name, count }))
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 5);
   }
 
   calculateSummary() {
@@ -157,7 +191,7 @@ export class ReportsPage implements OnInit, AfterViewInit {
   }
 
   renderCharts() {
-    // Gráfico de accesos por día
+    // 1. Accesos por día (barras)
     if (this.perDay.length > 0 && this.dayChartRef) {
       if (this.dayChart) this.dayChart.destroy();
       const ctx = this.dayChartRef.nativeElement.getContext('2d');
@@ -180,12 +214,15 @@ export class ReportsPage implements OnInit, AfterViewInit {
           responsive: true,
           maintainAspectRatio: false,
           plugins: { legend: { display: false } },
-          scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } },
+          scales: {
+            y: { beginAtZero: true, ticks: { stepSize: 1 } },
+            x: { ticks: { maxRotation: 45, minRotation: 0 } },
+          },
         },
       });
     }
 
-    // Gráfico de accesos por residente
+    // 2. Accesos por residente (tarta)
     if (this.perResident.length > 0 && this.residentChartRef) {
       if (this.residentChart) this.residentChart.destroy();
       const ctx = this.residentChartRef.nativeElement.getContext('2d');
@@ -221,6 +258,70 @@ export class ReportsPage implements OnInit, AfterViewInit {
               position: 'bottom',
               labels: { boxWidth: 12, font: { size: 10 } },
             },
+          },
+        },
+      });
+    }
+
+    // 3. Accesos por hora (barras)
+    if (this.perHour.length > 0 && this.hourChartRef) {
+      if (this.hourChart) this.hourChart.destroy();
+      const ctx = this.hourChartRef.nativeElement.getContext('2d');
+      if (!ctx) return;
+      this.hourChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: this.perHour.map((item) => `${item.hour}:00`),
+          datasets: [
+            {
+              label: 'Accesos',
+              data: this.perHour.map((item) => item.count),
+              backgroundColor: 'rgba(59, 130, 246, 0.6)',
+              borderColor: '#3b82f6',
+              borderWidth: 1,
+            },
+          ],
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: {
+            y: { beginAtZero: true, ticks: { stepSize: 1 } },
+            x: { ticks: { maxRotation: 45, minRotation: 0 } },
+          },
+        },
+      });
+    }
+
+    // 4. Top 5 visitantes (barras horizontales)
+    if (this.topVisitors.length > 0 && this.visitorChartRef) {
+      if (this.visitorChart) this.visitorChart.destroy();
+      const ctx = this.visitorChartRef.nativeElement.getContext('2d');
+      if (!ctx) return;
+      const labels = this.topVisitors.map((item) => item.name);
+      const data = this.topVisitors.map((item) => item.count);
+      this.visitorChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: labels,
+          datasets: [
+            {
+              label: 'Visitas',
+              data: data,
+              backgroundColor: 'rgba(236, 72, 153, 0.6)',
+              borderColor: '#ec4899',
+              borderWidth: 1,
+            },
+          ],
+        },
+        options: {
+          indexAxis: 'y',
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: {
+            x: { beginAtZero: true, ticks: { stepSize: 1 } },
           },
         },
       });
