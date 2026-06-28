@@ -13,7 +13,7 @@
   <form [formGroup]="form" (ngSubmit)="save()">
     <!-- Nombre -->
     <ion-item>
-      <ion-label position="floating"> Nombre *</ion-label>
+      <ion-label position="floating">Nombre *</ion-label>
       <ion-input formControlName="name" type="text"></ion-input>
     </ion-item>
     <ion-item
@@ -28,7 +28,7 @@
 
     <!-- DNI -->
     <ion-item>
-      <ion-label position="floating"> DNI *</ion-label>
+      <ion-label position="floating">DNI *</ion-label>
       <ion-input formControlName="dni" type="text" maxlength="8"></ion-input>
     </ion-item>
     <ion-item
@@ -43,7 +43,7 @@
 
     <!-- Estado -->
     <ion-item>
-      <ion-label> Estado</ion-label>
+      <ion-label>Estado</ion-label>
       <ion-select formControlName="status" interface="popover">
         <ion-select-option value="active">Activo</ion-select-option>
         <ion-select-option value="inactive">Inactivo</ion-select-option>
