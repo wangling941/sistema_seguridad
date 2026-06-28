@@ -10,7 +10,7 @@ import { VehicleFormComponent } from '../vehicle-form/vehicle-form.component';
   imports: [
     CommonModule,
     FormsModule,
-    ReactiveFormsModule, // <-- AGREGADO
+    ReactiveFormsModule,
     IonicModule,
     VehiclesPageRoutingModule,
   ],

@@ -1,6 +1,8 @@
 <ion-header>
   <ion-toolbar>
-    <ion-buttons slot="start"><ion-menu-button></ion-menu-button></ion-buttons>
+    <ion-buttons slot="start">
+      <ion-menu-button></ion-menu-button>
+    </ion-buttons>
     <ion-title>Vehículos</ion-title>
     <ion-buttons slot="end">
       <ion-button (click)="openForm()">
@@ -12,6 +14,7 @@
 
 <ion-content class="app-surface">
   <div class="page-wrap animate-in">
+    <!-- Título y contador -->
     <div class="page-title">
       <div>
         <h1>Vehículos</h1>
@@ -19,11 +22,13 @@
       </div>
     </div>
 
+    <!-- Barra de herramientas: búsqueda + refrescar -->
     <div class="toolbar-row">
       <ion-searchbar
         [(ngModel)]="search"
-        (ionInput)="load()"
+        (ionInput)="onSearch()"
         placeholder="Buscar por placa o residente"
+        class="search-input"
       ></ion-searchbar>
       <ion-button fill="outline" (click)="load()">
         <ion-icon slot="start" name="refresh-outline"></ion-icon>
@@ -31,8 +36,10 @@
       </ion-button>
     </div>
 
+    <!-- Contenedor de datos -->
     <section class="data-card">
-      <div class="responsive-table" *ngIf="vehicles.length; else empty">
+      <!-- Versión escritorio: tabla -->
+      <div class="desktop-table" *ngIf="vehicles.length > 0">
         <table>
           <thead>
             <tr>
@@ -68,11 +75,71 @@
           </tbody>
         </table>
       </div>
-      <ng-template #empty
-        ><div class="empty-state">
-          No hay vehículos registrados.
-        </div></ng-template
-      >
+
+      <!-- Versión móvil/tablet: tarjetas -->
+      <div class="mobile-cards" *ngIf="vehicles.length > 0">
+        <div class="vehicle-card" *ngFor="let vehicle of vehicles">
+          <div class="card-header">
+            <span class="vehicle-plate">{{ vehicle.plate }}</span>
+            <span class="resident-name"
+              >{{ getResidentName(vehicle.residentId) }}</span
+            >
+          </div>
+          <div class="card-body">
+            <div class="card-row">
+              <span class="label">Creado</span>
+              <span class="value">{{ vehicle.createdAt | date:'short' }}</span>
+            </div>
+          </div>
+          <div class="card-actions">
+            <ion-button fill="clear" size="small" (click)="openForm(vehicle)">
+              <ion-icon name="create-outline" slot="start"></ion-icon>
+              Editar
+            </ion-button>
+            <ion-button
+              fill="clear"
+              color="danger"
+              size="small"
+              (click)="deleteVehicle(vehicle)"
+            >
+              <ion-icon name="trash-outline" slot="start"></ion-icon>
+              Eliminar
+            </ion-button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Estado vacío -->
+      <div class="empty-state" *ngIf="vehicles.length === 0 && !loading">
+        <ion-icon name="car-outline"></ion-icon>
+        <p>No hay vehículos registrados</p>
+        <ion-button fill="outline" (click)="openForm()"
+          >Agregar primero</ion-button
+        >
+      </div>
+
+      <!-- Indicador de carga -->
+      <div class="loading-state" *ngIf="loading">
+        <ion-spinner name="crescent"></ion-spinner>
+        <p>Cargando...</p>
+      </div>
+
+      <!-- Paginación -->
+      <div class="pagination" *ngIf="totalPages > 1">
+        <button
+          (click)="changePage(currentPage - 1)"
+          [disabled]="currentPage === 1"
+        >
+          <ion-icon name="chevron-back-outline"></ion-icon>
+        </button>
+        <span>Página {{ currentPage }} de {{ totalPages }}</span>
+        <button
+          (click)="changePage(currentPage + 1)"
+          [disabled]="currentPage === totalPages"
+        >
+          <ion-icon name="chevron-forward-outline"></ion-icon>
+        </button>
+      </div>
     </section>
   </div>
 </ion-content>

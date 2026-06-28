@@ -22,6 +22,12 @@ export class VehiclesPage implements OnInit {
   search = '';
   loading = false;
 
+  // Paginación
+  currentPage = 1;
+  pageSize = 10;
+  totalPages = 1;
+  private searchTimeout: any;
+
   constructor(
     private api: Api,
     private modalController: ModalController,
@@ -30,21 +36,51 @@ export class VehiclesPage implements OnInit {
   ) {}
 
   ngOnInit() {
+    this.loadResidents();
     this.load();
-    this.api
-      .getResidents('', 1, 200)
-      .subscribe((res) => (this.residents = res.data));
+  }
+
+  loadResidents() {
+    this.api.getResidents('', 1, 200).subscribe((res) => {
+      this.residents = res.data;
+    });
   }
 
   load() {
     this.loading = true;
     this.api
-      .getVehicles(this.search, 1, 50)
+      .getVehicles(this.search, this.currentPage, this.pageSize)
       .pipe(finalize(() => (this.loading = false)))
-      .subscribe((result) => {
-        this.vehicles = result.data;
-        this.total = result.total;
+      .subscribe({
+        next: (result) => {
+          this.vehicles = result.data;
+          this.total = result.total;
+          this.totalPages = Math.ceil(this.total / this.pageSize);
+          // Ajustar página actual si es mayor al total
+          if (this.currentPage > this.totalPages) {
+            this.currentPage = 1;
+            // Recargar con la página corregida
+            this.load();
+          }
+        },
+        error: () => {
+          this.toast('Error al cargar vehículos', 'danger');
+        },
       });
+  }
+
+  changePage(page: number) {
+    if (page < 1 || page > this.totalPages) return;
+    this.currentPage = page;
+    this.load();
+  }
+
+  onSearch() {
+    clearTimeout(this.searchTimeout);
+    this.searchTimeout = setTimeout(() => {
+      this.currentPage = 1;
+      this.load();
+    }, 400);
   }
 
   async openForm(vehicle?: Vehicle) {
@@ -57,25 +93,33 @@ export class VehiclesPage implements OnInit {
   }
 
   getResidentName(id: number | null): string {
-    return this.residents.find((r) => r.id === id)?.name || 'Sin residente';
+    if (!id) return 'Sin residente';
+    const resident = this.residents.find((r) => r.id === id);
+    return resident ? resident.name : 'Sin residente';
   }
 
   async deleteVehicle(vehicle: Vehicle) {
     const alert = await this.alertController.create({
-      header: 'Eliminar vehículo',
-      message: `¿Eliminar placa ${vehicle.plate}?`,
+      header: `Eliminar vehículo "${vehicle.plate}"`,
+      message:
+        '¿Estás seguro de que deseas eliminar este vehículo? Esta acción no se puede deshacer.',
       buttons: [
-        { text: 'Cancelar', role: 'cancel' },
+        {
+          text: 'Cancelar',
+          role: 'cancel',
+        },
         {
           text: 'Eliminar',
           role: 'destructive',
           handler: () => {
             this.api.deleteVehicle(vehicle.id).subscribe({
               next: () => {
-                this.toast('Vehículo eliminado');
+                this.toast('Vehículo eliminado correctamente', 'success');
                 this.load();
               },
-              error: () => this.toast('Error al eliminar', 'danger'),
+              error: () => {
+                this.toast('No se pudo eliminar el vehículo', 'danger');
+              },
             });
           },
         },
@@ -91,8 +135,15 @@ export class VehiclesPage implements OnInit {
     const toast = await this.toastController.create({
       message,
       color,
-      duration: 2200,
-      position: 'top',
+      duration: 2500,
+      position: 'bottom',
+      cssClass: 'custom-toast',
+      buttons: [
+        {
+          icon: 'close-outline',
+          role: 'cancel',
+        },
+      ],
     });
     await toast.present();
   }

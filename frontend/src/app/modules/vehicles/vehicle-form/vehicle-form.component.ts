@@ -25,23 +25,60 @@ export class VehicleFormComponent implements OnInit {
     this.api
       .getResidents('', 1, 200)
       .subscribe((res) => (this.residents = res.data));
+
     this.form = this.fb.group({
       plate: [
         this.vehicle?.plate || '',
-        [Validators.required, Validators.pattern(/^[A-Za-z0-9\-]+$/)],
+        [
+          Validators.required,
+          Validators.minLength(3),
+          Validators.pattern(/^[A-Za-z0-9\-]+$/),
+        ],
       ],
       residentId: [this.vehicle?.residentId || null],
     });
+
+    // Formatear placa a mayúsculas automáticamente
+    this.form.get('plate')?.valueChanges.subscribe((value: string) => {
+      if (value) {
+        const upper = value.toUpperCase();
+        if (upper !== value) {
+          this.form.patchValue({ plate: upper }, { emitEvent: false });
+        }
+      }
+    });
+  }
+
+  // Método adicional para formatear al perder el foco
+  formatPlate() {
+    const control = this.form.get('plate');
+    if (control?.value) {
+      const upper = control.value.toUpperCase();
+      if (upper !== control.value) {
+        control.setValue(upper, { emitEvent: false });
+      }
+    }
   }
 
   save() {
-    if (this.form.invalid) return;
+    if (this.form.invalid) {
+      this.form.markAllAsTouched();
+      return;
+    }
+
+    const data = this.form.value;
     const obs = this.vehicle
-      ? this.api.updateVehicle(this.vehicle.id, this.form.value)
-      : this.api.createVehicle(this.form.value);
+      ? this.api.updateVehicle(this.vehicle.id, data)
+      : this.api.createVehicle(data);
+
     obs.subscribe({
-      next: () => this.modalController.dismiss(true),
-      error: () => alert('Error al guardar'),
+      next: () => {
+        this.modalController.dismiss(true);
+      },
+      error: () => {
+        // Aquí podrías mostrar un toast de error
+        console.error('Error al guardar');
+      },
     });
   }
 
