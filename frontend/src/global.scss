@@ -174,3 +174,11 @@ ion-content.app-surface {
     box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
   }
 }
+
+.detail-alert {
+  .alert-message {
+    white-space: pre-line;
+    font-size: 0.95rem;
+    line-height: 1.6;
+  }
+}

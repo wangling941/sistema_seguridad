@@ -5,11 +5,7 @@ import {
   ViewChild,
   ElementRef,
 } from '@angular/core';
-import {
-  AlertController,
-  ModalController,
-  ToastController,
-} from '@ionic/angular';
+import { AlertController } from '@ionic/angular';
 import { AccessLog, Resident, Vehicle, Visitor } from '../../../core/models';
 import { Api } from '../../../core/services/api';
 import { Auth } from '../../../core/services/auth';
@@ -37,7 +33,6 @@ export class ReportsPage implements OnInit, AfterViewInit {
   perDay: any[] = [];
   perResident: any[] = [];
 
-  // Filtros
   filters = {
     startDate: '',
     endDate: '',
@@ -45,22 +40,18 @@ export class ReportsPage implements OnInit, AfterViewInit {
     vehiclePlate: '',
   };
 
-  // Paginación
   currentPage = 1;
   pageSize = 10;
   totalPages = 1;
 
-  // Estado
   loading = false;
   loadError = '';
   dateError = '';
 
-  // Resumen
   todayAccesses = 0;
   pendingAccesses = 0;
   vehiclesUsed = 0;
 
-  // Charts
   private dayChart: Chart | null = null;
   private residentChart: Chart | null = null;
   private searchTimeout: any;
@@ -68,8 +59,6 @@ export class ReportsPage implements OnInit, AfterViewInit {
   constructor(
     private api: Api,
     private auth: Auth,
-    private toastController: ToastController,
-    private modalController: ModalController,
     private alertController: AlertController,
   ) {}
 
@@ -79,7 +68,7 @@ export class ReportsPage implements OnInit, AfterViewInit {
   }
 
   ngAfterViewInit() {
-    // Los gráficos se inicializan después de cargar los datos
+    // Se llama después de la vista, pero los gráficos se renderizan cuando los datos llegan
   }
 
   loadSelects() {
@@ -123,18 +112,26 @@ export class ReportsPage implements OnInit, AfterViewInit {
 
     this.api.getReport(params).subscribe({
       next: (result: any) => {
+        // Extraer datos del backend
         this.logs = result.logs?.data || [];
         this.total = result.logs?.total || 0;
         this.perDay = result.perDay || [];
         this.perResident = result.perResident || [];
+
         this.totalPages = Math.ceil(this.total / this.pageSize);
         if (this.currentPage > this.totalPages) {
           this.currentPage = 1;
           this.load();
           return;
         }
+
         this.calculateSummary();
-        this.renderCharts();
+
+        // Renderizar gráficos después de que el DOM se actualice
+        setTimeout(() => {
+          this.renderCharts();
+        }, 200);
+
         this.loading = false;
       },
       error: (err) => {
@@ -160,6 +157,7 @@ export class ReportsPage implements OnInit, AfterViewInit {
   }
 
   renderCharts() {
+    // Gráfico de accesos por día
     if (this.perDay.length > 0 && this.dayChartRef) {
       if (this.dayChart) this.dayChart.destroy();
       const ctx = this.dayChartRef.nativeElement.getContext('2d');
@@ -167,11 +165,11 @@ export class ReportsPage implements OnInit, AfterViewInit {
       this.dayChart = new Chart(ctx, {
         type: 'bar',
         data: {
-          labels: this.perDay.map((item) => item.date),
+          labels: this.perDay.map((item) => item.date || item.day || ''),
           datasets: [
             {
               label: 'Accesos',
-              data: this.perDay.map((item) => item.count),
+              data: this.perDay.map((item) => item.count || item.total || 0),
               backgroundColor: 'rgba(15, 118, 110, 0.6)',
               borderColor: '#0f766e',
               borderWidth: 1,
@@ -181,28 +179,25 @@ export class ReportsPage implements OnInit, AfterViewInit {
         options: {
           responsive: true,
           maintainAspectRatio: false,
-          plugins: {
-            legend: { display: false },
-          },
-          scales: {
-            y: { beginAtZero: true, ticks: { stepSize: 1 } },
-          },
+          plugins: { legend: { display: false } },
+          scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } },
         },
       });
     }
 
+    // Gráfico de accesos por residente
     if (this.perResident.length > 0 && this.residentChartRef) {
       if (this.residentChart) this.residentChart.destroy();
       const ctx = this.residentChartRef.nativeElement.getContext('2d');
       if (!ctx) return;
-      const topResidents = this.perResident.slice(0, 10);
+      const top = this.perResident.slice(0, 10);
       this.residentChart = new Chart(ctx, {
         type: 'pie',
         data: {
-          labels: topResidents.map((item) => item.name),
+          labels: top.map((item) => item.name || 'Sin residente'),
           datasets: [
             {
-              data: topResidents.map((item) => item.count),
+              data: top.map((item) => item.count || item.total || 0),
               backgroundColor: [
                 '#0f766e',
                 '#0d9488',
@@ -279,18 +274,19 @@ export class ReportsPage implements OnInit, AfterViewInit {
   }
 
   async viewDetails(log: AccessLog) {
-    // Puedes abrir un modal con el detalle completo
+    const message = `
+Residente: ${this.getResidentName(log.residentId)}
+Vehículo: ${this.getVehiclePlate(log.vehicleId)}
+Visitante: ${this.getVisitorName(log.visitorId)}
+Entrada: ${new Date(log.entryDatetime).toLocaleString()}
+Salida: ${log.exitDatetime ? new Date(log.exitDatetime).toLocaleString() : 'Pendiente'}
+Estado: ${log.exitDatetime ? 'Completado' : 'Pendiente'}
+    `;
     const alert = await this.alertController.create({
       header: `Acceso #${log.id}`,
-      message: `
-        Residente: ${this.getResidentName(log.residentId)}
-        Vehículo: ${this.getVehiclePlate(log.vehicleId)}
-        Visitante: ${this.getVisitorName(log.visitorId)}
-        Entrada: ${new Date(log.entryDatetime).toLocaleString()}
-        Salida: ${log.exitDatetime ? new Date(log.exitDatetime).toLocaleString() : 'Pendiente'}
-        Estado: ${log.exitDatetime ? 'Completado' : 'Pendiente'}
-      `,
+      message: message,
       buttons: ['Cerrar'],
+      cssClass: 'detail-alert',
     });
     await alert.present();
   }
@@ -299,7 +295,6 @@ export class ReportsPage implements OnInit, AfterViewInit {
     const doc = new jsPDF('landscape', 'mm', 'a4');
     const pageWidth = doc.internal.pageSize.getWidth();
 
-    // Título
     doc.setFontSize(20);
     doc.text('Sistema Seguridad - Paraíso Verde', pageWidth / 2, 20, {
       align: 'center',
@@ -318,7 +313,6 @@ export class ReportsPage implements OnInit, AfterViewInit {
       { align: 'center' },
     );
 
-    // Filtros
     let filterText = 'Todos los registros';
     if (this.filters.startDate && this.filters.endDate) {
       filterText = `Desde ${this.filters.startDate} hasta ${this.filters.endDate}`;
@@ -339,13 +333,11 @@ export class ReportsPage implements OnInit, AfterViewInit {
     doc.setFontSize(10);
     doc.text(`Filtro: ${filterText}`, 14, 44);
 
-    // Resumen
     doc.setFontSize(11);
     doc.text(`Total registros: ${this.total}`, 14, 52);
     doc.text(`Accesos hoy: ${this.todayAccesses}`, 14, 58);
     doc.text(`Pendientes: ${this.pendingAccesses}`, 14, 64);
 
-    // Tabla
     const tableData = this.logs.map((log) => [
       `#${log.id}`,
       this.getResidentName(log.residentId),
@@ -377,7 +369,6 @@ export class ReportsPage implements OnInit, AfterViewInit {
       alternateRowStyles: { fillColor: [245, 245, 245] },
     });
 
-    // Pie de página
     const pageCount = doc.internal.pages.length;
     for (let i = 1; i < pageCount; i++) {
       doc.setPage(i);
@@ -395,19 +386,5 @@ export class ReportsPage implements OnInit, AfterViewInit {
     }
 
     doc.save('reporte_accesos.pdf');
-  }
-
-  private async toast(
-    message: string,
-    color: 'success' | 'danger' = 'success',
-  ) {
-    const toast = await this.toastController.create({
-      message,
-      color,
-      duration: 2500,
-      position: 'bottom',
-      buttons: [{ icon: 'close-outline', role: 'cancel' }],
-    });
-    await toast.present();
   }
 }

@@ -1,11 +1,9 @@
 <ion-header>
   <ion-toolbar>
-    <ion-buttons slot="start">
-      <ion-menu-button></ion-menu-button>
-    </ion-buttons>
+    <ion-buttons slot="start"><ion-menu-button></ion-menu-button></ion-buttons>
     <ion-title>Reportes</ion-title>
     <ion-buttons slot="end">
-      <ion-button (click)="exportReportPDF()" class="export-btn">
+      <ion-button (click)="exportReportPDF()">
         <ion-icon slot="icon-only" name="document-text-outline"></ion-icon>
       </ion-button>
     </ion-buttons>
@@ -14,7 +12,6 @@
 
 <ion-content class="app-surface">
   <div class="page-wrap animate-in">
-    <!-- Título -->
     <div class="page-title">
       <div>
         <h1>Reportes de accesos</h1>
@@ -69,17 +66,14 @@
           ></ion-input>
         </ion-item>
       </div>
-
-      <!-- Mensaje de error de fechas -->
       <div class="error-msg" *ngIf="dateError">
         <ion-icon name="alert-circle-outline"></ion-icon>
         {{ dateError }}
       </div>
-
       <div class="form-actions">
-        <ion-button fill="clear" color="medium" (click)="clearFilters()">
-          Limpiar
-        </ion-button>
+        <ion-button fill="clear" color="medium" (click)="clearFilters()"
+          >Limpiar</ion-button
+        >
         <ion-button (click)="load()" [disabled]="!!dateError">
           <ion-icon slot="start" name="filter-outline"></ion-icon>
           Filtrar
@@ -107,21 +101,28 @@
       </div>
     </section>
 
-    <!-- Gráficos (si hay datos) -->
-    <section class="charts-section" *ngIf="!loading && logs.length > 0">
+    <!-- Gráficos -->
+    <section
+      class="charts-section"
+      *ngIf="!loading && logs.length > 0 && perDay.length > 0"
+    >
       <div class="chart-card">
         <h4>Accesos por día</h4>
-        <canvas id="dayChart" width="400" height="200"></canvas>
+        <canvas #dayChart></canvas>
       </div>
+    </section>
+    <section
+      class="charts-section"
+      *ngIf="!loading && logs.length > 0 && perResident.length > 0"
+    >
       <div class="chart-card">
         <h4>Accesos por residente</h4>
-        <canvas id="residentChart" width="400" height="200"></canvas>
+        <canvas #residentChart></canvas>
       </div>
     </section>
 
     <!-- Tabla / Tarjetas -->
     <section class="data-card">
-      <!-- Escritorio: tabla -->
       <div class="desktop-table" *ngIf="logs.length > 0">
         <table>
           <thead>
@@ -166,7 +167,6 @@
         </table>
       </div>
 
-      <!-- Móvil: tarjetas -->
       <div class="mobile-cards" *ngIf="logs.length > 0">
         <div class="log-card" *ngFor="let log of logs">
           <div class="card-header">
@@ -202,14 +202,12 @@
           </div>
           <div class="card-actions">
             <ion-button fill="clear" size="small" (click)="viewDetails(log)">
-              <ion-icon name="eye-outline" slot="start"></ion-icon>
-              Ver
+              <ion-icon name="eye-outline" slot="start"></ion-icon> Ver
             </ion-button>
           </div>
         </div>
       </div>
 
-      <!-- Estado vacío -->
       <div class="empty-state" *ngIf="logs.length === 0 && !loading">
         <ion-icon name="document-text-outline"></ion-icon>
         <p>No hay datos con esos filtros</p>
@@ -218,20 +216,11 @@
         >
       </div>
 
-      <!-- Cargando -->
       <div class="loading-state" *ngIf="loading">
         <ion-spinner name="crescent"></ion-spinner>
         <p>Cargando...</p>
       </div>
 
-      <!-- Error -->
-      <div class="error-state" *ngIf="loadError">
-        <ion-icon name="alert-circle-outline"></ion-icon>
-        <p>{{ loadError }}</p>
-        <ion-button fill="outline" (click)="load()">Reintentar</ion-button>
-      </div>
-
-      <!-- Paginación -->
       <div class="pagination" *ngIf="totalPages > 1 && !loading">
         <button
           (click)="changePage(currentPage - 1)"

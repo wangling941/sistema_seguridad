@@ -168,8 +168,8 @@
 
     canvas {
       width: 100% !important;
-      height: auto !important;
       max-height: 200px;
+      height: auto !important;
     }
   }
 }
@@ -186,7 +186,6 @@
   }
 }
 
-/* --- Tabla (escritorio) --- */
 .desktop-table {
   display: none;
 
@@ -239,7 +238,6 @@
   }
 }
 
-/* --- Tarjetas (móvil) --- */
 .mobile-cards {
   display: grid;
   grid-template-columns: 1fr;
@@ -316,10 +314,8 @@
   }
 }
 
-/* --- Estados --- */
 .empty-state,
-.loading-state,
-.error-state {
+.loading-state {
   text-align: center;
   padding: 40px 20px;
   color: #94a3b8;
@@ -336,14 +332,10 @@
   }
 }
 
-.error-state {
-  color: #dc2626;
-  ion-icon {
-    color: #dc2626;
-  }
+.loading-state {
+  padding: 60px 20px;
 }
 
-/* --- Paginación --- */
 .pagination {
   display: flex;
   justify-content: center;
@@ -387,7 +379,6 @@
   }
 }
 
-/* --- Píldora de estado --- */
 .status-pill {
   display: inline-block;
   padding: 4px 14px;
