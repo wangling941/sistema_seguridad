@@ -21,6 +21,12 @@ export class VisitorsPage implements OnInit {
   search = '';
   loading = false;
 
+  // Paginación
+  currentPage = 1;
+  pageSize = 10;
+  totalPages = 1;
+  private searchTimeout: any;
+
   constructor(
     private api: Api,
     private modalController: ModalController,
@@ -35,12 +41,36 @@ export class VisitorsPage implements OnInit {
   load() {
     this.loading = true;
     this.api
-      .getVisitors(this.search, 1, 50)
+      .getVisitors(this.search, this.currentPage, this.pageSize)
       .pipe(finalize(() => (this.loading = false)))
-      .subscribe((result) => {
-        this.visitors = result.data;
-        this.total = result.total;
+      .subscribe({
+        next: (result) => {
+          this.visitors = result.data;
+          this.total = result.total;
+          this.totalPages = Math.ceil(this.total / this.pageSize);
+          if (this.currentPage > this.totalPages) {
+            this.currentPage = 1;
+            this.load();
+          }
+        },
+        error: () => {
+          this.toast('Error al cargar visitantes', 'danger');
+        },
       });
+  }
+
+  changePage(page: number) {
+    if (page < 1 || page > this.totalPages) return;
+    this.currentPage = page;
+    this.load();
+  }
+
+  onSearch() {
+    clearTimeout(this.searchTimeout);
+    this.searchTimeout = setTimeout(() => {
+      this.currentPage = 1;
+      this.load();
+    }, 400);
   }
 
   async openForm(visitor?: Visitor) {
@@ -54,20 +84,26 @@ export class VisitorsPage implements OnInit {
 
   async deleteVisitor(visitor: Visitor) {
     const alert = await this.alertController.create({
-      header: 'Eliminar visitante',
-      message: `¿Eliminar a ${visitor.name}?`,
+      header: `Eliminar visitante "${visitor.name}"`,
+      message:
+        '¿Estás seguro de que deseas eliminar este visitante? Esta acción no se puede deshacer.',
       buttons: [
-        { text: 'Cancelar', role: 'cancel' },
+        {
+          text: 'Cancelar',
+          role: 'cancel',
+        },
         {
           text: 'Eliminar',
           role: 'destructive',
           handler: () => {
             this.api.deleteVisitor(visitor.id).subscribe({
               next: () => {
-                this.toast('Visitante eliminado');
+                this.toast('Visitante eliminado correctamente', 'success');
                 this.load();
               },
-              error: () => this.toast('Error al eliminar', 'danger'),
+              error: () => {
+                this.toast('No se pudo eliminar el visitante', 'danger');
+              },
             });
           },
         },
@@ -83,8 +119,15 @@ export class VisitorsPage implements OnInit {
     const toast = await this.toastController.create({
       message,
       color,
-      duration: 2200,
-      position: 'top',
+      duration: 2500,
+      position: 'bottom',
+      cssClass: 'custom-toast',
+      buttons: [
+        {
+          icon: 'close-outline',
+          role: 'cancel',
+        },
+      ],
     });
     await toast.present();
   }

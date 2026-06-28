@@ -10,7 +10,7 @@ import { VisitorFormComponent } from '../visitor-form/visitor-form.component';
   imports: [
     CommonModule,
     FormsModule,
-    ReactiveFormsModule, // <-- AGREGADO
+    ReactiveFormsModule,
     IonicModule,
     VisitorsPageRoutingModule,
   ],

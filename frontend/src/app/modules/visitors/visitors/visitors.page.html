@@ -1,6 +1,8 @@
 <ion-header>
   <ion-toolbar>
-    <ion-buttons slot="start"><ion-menu-button></ion-menu-button></ion-buttons>
+    <ion-buttons slot="start">
+      <ion-menu-button></ion-menu-button>
+    </ion-buttons>
     <ion-title>Visitantes</ion-title>
     <ion-buttons slot="end">
       <ion-button (click)="openForm()">
@@ -12,6 +14,7 @@
 
 <ion-content class="app-surface">
   <div class="page-wrap animate-in">
+    <!-- Título y contador -->
     <div class="page-title">
       <div>
         <h1>Visitantes</h1>
@@ -19,11 +22,13 @@
       </div>
     </div>
 
+    <!-- Barra de herramientas: búsqueda + refrescar -->
     <div class="toolbar-row">
       <ion-searchbar
         [(ngModel)]="search"
-        (ionInput)="load()"
+        (ionInput)="onSearch()"
         placeholder="Buscar por nombre o DNI"
+        class="search-input"
       ></ion-searchbar>
       <ion-button fill="outline" (click)="load()">
         <ion-icon slot="start" name="refresh-outline"></ion-icon>
@@ -31,8 +36,10 @@
       </ion-button>
     </div>
 
+    <!-- Contenedor de datos -->
     <section class="data-card">
-      <div class="responsive-table" *ngIf="visitors.length; else empty">
+      <!-- Versión escritorio: tabla -->
+      <div class="desktop-table" *ngIf="visitors.length > 0">
         <table>
           <thead>
             <tr>
@@ -48,8 +55,13 @@
             <tr *ngFor="let visitor of visitors">
               <td><strong>{{ visitor.name }}</strong></td>
               <td>{{ visitor.dni }}</td>
-              <td>{{ visitor.hasVehicle ? visitor.vehiclePlate : 'No' }}</td>
-              <td>{{ visitor.companionsCount || 0 }}</td>
+              <td>
+                <span *ngIf="visitor.hasVehicle; else noVehicle">
+                  {{ visitor.vehiclePlate }}
+                </span>
+                <ng-template #noVehicle>—</ng-template>
+              </td>
+              <td>{{ visitor.companionsCount ?? 0 }}</td>
               <td>
                 <span
                   class="status-pill"
@@ -79,11 +91,84 @@
           </tbody>
         </table>
       </div>
-      <ng-template #empty
-        ><div class="empty-state">
-          No hay visitantes registrados.
-        </div></ng-template
-      >
+
+      <!-- Versión móvil/tablet: tarjetas -->
+      <div class="mobile-cards" *ngIf="visitors.length > 0">
+        <div class="visitor-card" *ngFor="let visitor of visitors">
+          <div class="card-header">
+            <span class="visitor-name">{{ visitor.name }}</span>
+            <span
+              class="status-pill"
+              [class.inactive]="visitor.status === 'inactive'"
+            >
+              {{ visitor.status === 'active' ? 'Activo' : 'Inactivo' }}
+            </span>
+          </div>
+          <div class="card-body">
+            <div class="card-row">
+              <span class="label">DNI</span>
+              <span class="value">{{ visitor.dni }}</span>
+            </div>
+            <div class="card-row">
+              <span class="label">Vehículo</span>
+              <span class="value"
+                >{{ visitor.hasVehicle ? visitor.vehiclePlate : '—' }}</span
+              >
+            </div>
+            <div class="card-row">
+              <span class="label">Acompañantes</span>
+              <span class="value">{{ visitor.companionsCount ?? 0 }}</span>
+            </div>
+          </div>
+          <div class="card-actions">
+            <ion-button fill="clear" size="small" (click)="openForm(visitor)">
+              <ion-icon name="create-outline" slot="start"></ion-icon>
+              Editar
+            </ion-button>
+            <ion-button
+              fill="clear"
+              color="danger"
+              size="small"
+              (click)="deleteVisitor(visitor)"
+            >
+              <ion-icon name="trash-outline" slot="start"></ion-icon>
+              Eliminar
+            </ion-button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Estado vacío -->
+      <div class="empty-state" *ngIf="visitors.length === 0 && !loading">
+        <ion-icon name="people-outline"></ion-icon>
+        <p>No hay visitantes registrados</p>
+        <ion-button fill="outline" (click)="openForm()"
+          >Agregar primero</ion-button
+        >
+      </div>
+
+      <!-- Indicador de carga -->
+      <div class="loading-state" *ngIf="loading">
+        <ion-spinner name="crescent"></ion-spinner>
+        <p>Cargando...</p>
+      </div>
+
+      <!-- Paginación -->
+      <div class="pagination" *ngIf="totalPages > 1">
+        <button
+          (click)="changePage(currentPage - 1)"
+          [disabled]="currentPage === 1"
+        >
+          <ion-icon name="chevron-back-outline"></ion-icon>
+        </button>
+        <span>Página {{ currentPage }} de {{ totalPages }}</span>
+        <button
+          (click)="changePage(currentPage + 1)"
+          [disabled]="currentPage === totalPages"
+        >
+          <ion-icon name="chevron-forward-outline"></ion-icon>
+        </button>
+      </div>
     </section>
   </div>
 </ion-content>

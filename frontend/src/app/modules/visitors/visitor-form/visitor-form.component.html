@@ -11,74 +11,128 @@
 
 <ion-content>
   <form [formGroup]="form" (ngSubmit)="save()">
+    <!-- Nombre -->
     <ion-item>
-      <ion-label position="floating">Nombre</ion-label>
-      <ion-input formControlName="name"></ion-input>
+      <ion-label position="floating">Nombre *</ion-label>
+      <ion-input formControlName="name" type="text"></ion-input>
     </ion-item>
-    <ion-item *ngIf="form.get('name')?.invalid && form.get('name')?.touched">
-      <ion-text color="danger"
-        >El nombre es obligatorio y solo letras.</ion-text
-      >
+    <ion-item
+      lines="none"
+      *ngIf="form.get('name')?.invalid && form.get('name')?.touched"
+    >
+      <ion-text color="danger" class="error-text">
+        <ion-icon name="alert-circle-outline" slot="start"></ion-icon>
+        <span *ngIf="form.get('name')?.hasError('required')"
+          >El nombre es requerido.</span
+        >
+        <span *ngIf="form.get('name')?.hasError('pattern')"
+          >El nombre solo puede contener letras y espacios.</span
+        >
+      </ion-text>
     </ion-item>
 
+    <!-- DNI -->
     <ion-item>
-      <ion-label position="floating">DNI</ion-label>
-      <ion-input formControlName="dni"></ion-input>
+      <ion-label position="floating">DNI *</ion-label>
+      <ion-input formControlName="dni" type="text" maxlength="8"></ion-input>
     </ion-item>
-    <ion-item *ngIf="form.get('dni')?.invalid && form.get('dni')?.touched">
-      <ion-text color="danger"
-        >El DNI debe tener exactamente 8 dígitos numéricos.</ion-text
-      >
+    <ion-item
+      lines="none"
+      *ngIf="form.get('dni')?.invalid && form.get('dni')?.touched"
+    >
+      <ion-text color="danger" class="error-text">
+        <ion-icon name="alert-circle-outline" slot="start"></ion-icon>
+        <span *ngIf="form.get('dni')?.hasError('required')"
+          >El DNI es requerido.</span
+        >
+        <span *ngIf="form.get('dni')?.hasError('pattern')"
+          >El DNI debe tener exactamente 8 dígitos numéricos.</span
+        >
+      </ion-text>
     </ion-item>
 
+    <!-- Estado -->
     <ion-item>
       <ion-label>Estado</ion-label>
-      <ion-select formControlName="status">
+      <ion-select formControlName="status" interface="popover">
         <ion-select-option value="active">Activo</ion-select-option>
         <ion-select-option value="inactive">Inactivo</ion-select-option>
       </ion-select>
     </ion-item>
 
+    <!-- Tiene vehículo (toggle) -->
     <ion-item>
       <ion-toggle formControlName="hasVehicle">Tiene vehículo</ion-toggle>
     </ion-item>
 
+    <!-- Placa (condicional) -->
     <ion-item *ngIf="form.get('hasVehicle')?.value">
-      <ion-label position="floating">Placa</ion-label>
-      <ion-input formControlName="vehiclePlate"></ion-input>
+      <ion-label position="floating">Placa *</ion-label>
+      <ion-input
+        formControlName="vehiclePlate"
+        type="text"
+        maxlength="10"
+      ></ion-input>
     </ion-item>
     <ion-item
+      lines="none"
       *ngIf="
         form.get('hasVehicle')?.value &&
         form.get('vehiclePlate')?.invalid &&
         form.get('vehiclePlate')?.touched
       "
     >
-      <ion-text color="danger"
-        >La placa solo puede tener letras, números y guiones.</ion-text
-      >
+      <ion-text color="danger" class="error-text">
+        <ion-icon name="alert-circle-outline" slot="start"></ion-icon>
+        <span *ngIf="form.get('vehiclePlate')?.hasError('required')"
+          >La placa es requerida si tiene vehículo.</span
+        >
+        <span *ngIf="form.get('vehiclePlate')?.hasError('pattern')"
+          >La placa solo puede contener letras, números y guiones.</span
+        >
+      </ion-text>
     </ion-item>
 
+    <!-- Acompañantes -->
     <ion-item>
       <ion-label position="floating">Acompañantes</ion-label>
-      <ion-input formControlName="companionsCount" type="number"></ion-input>
+      <ion-input
+        formControlName="companionsCount"
+        type="number"
+        min="0"
+      ></ion-input>
     </ion-item>
     <ion-item
+      lines="none"
       *ngIf="
         form.get('companionsCount')?.invalid &&
         form.get('companionsCount')?.touched
       "
     >
-      <ion-text color="danger"
-        >El número de acompañantes debe ser mayor o igual a 0.</ion-text
-      >
+      <ion-text color="danger" class="error-text">
+        <ion-icon name="alert-circle-outline" slot="start"></ion-icon>
+        <span *ngIf="form.get('companionsCount')?.hasError('min')"
+          >El número de acompañantes no puede ser negativo.</span
+        >
+      </ion-text>
     </ion-item>
 
-    <div class="form-actions" style="padding: 16px">
-      <ion-button fill="clear" color="medium" (click)="dismiss()"
-        >Cancelar</ion-button
+    <!-- Botones -->
+    <div class="form-actions">
+      <ion-button
+        fill="clear"
+        color="medium"
+        (click)="dismiss()"
+        expand="block"
       >
-      <ion-button type="submit" [disabled]="form.invalid">
+        Cancelar
+      </ion-button>
+      <ion-button
+        type="submit"
+        [disabled]="form.invalid"
+        expand="block"
+        shape="round"
+      >
         {{ visitor ? "Actualizar" : "Crear" }}
       </ion-button>
     </div>
