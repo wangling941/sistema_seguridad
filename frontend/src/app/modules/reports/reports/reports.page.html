@@ -1,16 +1,24 @@
 <ion-header>
   <ion-toolbar>
-    <ion-buttons slot="start"><ion-menu-button></ion-menu-button></ion-buttons>
+    <ion-buttons slot="start">
+      <ion-menu-button></ion-menu-button>
+    </ion-buttons>
     <ion-title>Reportes</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="exportReportPDF()" class="export-btn">
+        <ion-icon slot="icon-only" name="document-text-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
   </ion-toolbar>
 </ion-header>
 
 <ion-content class="app-surface">
   <div class="page-wrap animate-in">
+    <!-- Título -->
     <div class="page-title">
       <div>
         <h1>Reportes de accesos</h1>
-        <p>{{ total }} resultados filtrados</p>
+        <p>{{ total }} registros encontrados</p>
       </div>
       <ion-button color="danger" (click)="exportReportPDF()" class="export-btn">
         <ion-icon slot="start" name="document-text-outline"></ion-icon>
@@ -27,6 +35,7 @@
             labelPlacement="stacked"
             type="date"
             [(ngModel)]="filters.startDate"
+            (ionChange)="onFilterChange()"
           ></ion-input>
         </ion-item>
         <ion-item>
@@ -35,6 +44,7 @@
             labelPlacement="stacked"
             type="date"
             [(ngModel)]="filters.endDate"
+            (ionChange)="onFilterChange()"
           ></ion-input>
         </ion-item>
         <ion-item>
@@ -42,6 +52,7 @@
             label="Residente"
             labelPlacement="stacked"
             [(ngModel)]="filters.residentId"
+            (ionChange)="onFilterChange()"
           >
             <ion-select-option [value]="null">Todos</ion-select-option>
             <ion-select-option *ngFor="let r of residents" [value]="r.id">
@@ -54,23 +65,64 @@
             label="Placa"
             labelPlacement="stacked"
             [(ngModel)]="filters.vehiclePlate"
+            (ionInput)="onVehiclePlateChange()"
           ></ion-input>
         </ion-item>
       </div>
+
+      <!-- Mensaje de error de fechas -->
+      <div class="error-msg" *ngIf="dateError">
+        <ion-icon name="alert-circle-outline"></ion-icon>
+        {{ dateError }}
+      </div>
+
       <div class="form-actions">
-        <ion-button fill="clear" color="medium" (click)="clear()"
-          >Limpiar</ion-button
-        >
-        <ion-button (click)="load()">
+        <ion-button fill="clear" color="medium" (click)="clearFilters()">
+          Limpiar
+        </ion-button>
+        <ion-button (click)="load()" [disabled]="!!dateError">
           <ion-icon slot="start" name="filter-outline"></ion-icon>
           Filtrar
         </ion-button>
       </div>
     </section>
 
-    <!-- Tabla de resultados -->
+    <!-- Cards de resumen -->
+    <section class="summary-cards" *ngIf="!loading && logs.length > 0">
+      <div class="card-item">
+        <div class="card-value">{{ total }}</div>
+        <div class="card-label">Total accesos</div>
+      </div>
+      <div class="card-item">
+        <div class="card-value">{{ todayAccesses }}</div>
+        <div class="card-label">Hoy</div>
+      </div>
+      <div class="card-item">
+        <div class="card-value">{{ pendingAccesses }}</div>
+        <div class="card-label">Pendientes</div>
+      </div>
+      <div class="card-item">
+        <div class="card-value">{{ vehiclesUsed }}</div>
+        <div class="card-label">Vehículos</div>
+      </div>
+    </section>
+
+    <!-- Gráficos (si hay datos) -->
+    <section class="charts-section" *ngIf="!loading && logs.length > 0">
+      <div class="chart-card">
+        <h4>Accesos por día</h4>
+        <canvas id="dayChart" width="400" height="200"></canvas>
+      </div>
+      <div class="chart-card">
+        <h4>Accesos por residente</h4>
+        <canvas id="residentChart" width="400" height="200"></canvas>
+      </div>
+    </section>
+
+    <!-- Tabla / Tarjetas -->
     <section class="data-card">
-      <div class="responsive-table" *ngIf="logs.length; else empty">
+      <!-- Escritorio: tabla -->
+      <div class="desktop-table" *ngIf="logs.length > 0">
         <table>
           <thead>
             <tr>
@@ -81,6 +133,7 @@
               <th>Entrada</th>
               <th>Salida</th>
               <th>Estado</th>
+              <th style="text-align: right">Acciones</th>
             </tr>
           </thead>
           <tbody>
@@ -99,13 +152,101 @@
                   {{ log.exitDatetime ? 'Completado' : 'Pendiente' }}
                 </span>
               </td>
+              <td class="actions">
+                <ion-button
+                  size="small"
+                  fill="clear"
+                  (click)="viewDetails(log)"
+                >
+                  <ion-icon slot="icon-only" name="eye-outline"></ion-icon>
+                </ion-button>
+              </td>
             </tr>
           </tbody>
         </table>
       </div>
-      <ng-template #empty>
-        <div class="empty-state">No hay datos con esos filtros.</div>
-      </ng-template>
+
+      <!-- Móvil: tarjetas -->
+      <div class="mobile-cards" *ngIf="logs.length > 0">
+        <div class="log-card" *ngFor="let log of logs">
+          <div class="card-header">
+            <span class="log-id">#{{ log.id }}</span>
+            <span class="status-pill" [class.pending]="!log.exitDatetime">
+              {{ log.exitDatetime ? 'Completado' : 'Pendiente' }}
+            </span>
+          </div>
+          <div class="card-body">
+            <div class="card-row">
+              <span class="label">Residente</span>
+              <span class="value">{{ getResidentName(log.residentId) }}</span>
+            </div>
+            <div class="card-row">
+              <span class="label">Vehículo</span>
+              <span class="value">{{ getVehiclePlate(log.vehicleId) }}</span>
+            </div>
+            <div class="card-row">
+              <span class="label">Visitante</span>
+              <span class="value">{{ getVisitorName(log.visitorId) }}</span>
+            </div>
+            <div class="card-row">
+              <span class="label">Entrada</span>
+              <span class="value">{{ log.entryDatetime | date:'short' }}</span>
+            </div>
+            <div class="card-row">
+              <span class="label">Salida</span>
+              <span class="value"
+                >{{ log.exitDatetime ? (log.exitDatetime | date:'short') :
+                'Pendiente' }}</span
+              >
+            </div>
+          </div>
+          <div class="card-actions">
+            <ion-button fill="clear" size="small" (click)="viewDetails(log)">
+              <ion-icon name="eye-outline" slot="start"></ion-icon>
+              Ver
+            </ion-button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Estado vacío -->
+      <div class="empty-state" *ngIf="logs.length === 0 && !loading">
+        <ion-icon name="document-text-outline"></ion-icon>
+        <p>No hay datos con esos filtros</p>
+        <ion-button fill="outline" (click)="clearFilters()"
+          >Limpiar filtros</ion-button
+        >
+      </div>
+
+      <!-- Cargando -->
+      <div class="loading-state" *ngIf="loading">
+        <ion-spinner name="crescent"></ion-spinner>
+        <p>Cargando...</p>
+      </div>
+
+      <!-- Error -->
+      <div class="error-state" *ngIf="loadError">
+        <ion-icon name="alert-circle-outline"></ion-icon>
+        <p>{{ loadError }}</p>
+        <ion-button fill="outline" (click)="load()">Reintentar</ion-button>
+      </div>
+
+      <!-- Paginación -->
+      <div class="pagination" *ngIf="totalPages > 1 && !loading">
+        <button
+          (click)="changePage(currentPage - 1)"
+          [disabled]="currentPage === 1"
+        >
+          <ion-icon name="chevron-back-outline"></ion-icon>
+        </button>
+        <span>Página {{ currentPage }} de {{ totalPages }}</span>
+        <button
+          (click)="changePage(currentPage + 1)"
+          [disabled]="currentPage === totalPages"
+        >
+          <ion-icon name="chevron-forward-outline"></ion-icon>
+        </button>
+      </div>
     </section>
   </div>
 </ion-content>

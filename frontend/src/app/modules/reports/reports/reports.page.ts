@@ -1,9 +1,23 @@
-import { Component, OnInit } from '@angular/core';
+import {
+  Component,
+  OnInit,
+  AfterViewInit,
+  ViewChild,
+  ElementRef,
+} from '@angular/core';
+import {
+  AlertController,
+  ModalController,
+  ToastController,
+} from '@ionic/angular';
 import { AccessLog, Resident, Vehicle, Visitor } from '../../../core/models';
 import { Api } from '../../../core/services/api';
 import { Auth } from '../../../core/services/auth';
+import { Chart, registerables } from 'chart.js';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
+
+Chart.register(...registerables);
 
 @Component({
   selector: 'app-reports',
@@ -11,7 +25,10 @@ import autoTable from 'jspdf-autotable';
   styleUrls: ['./reports.page.scss'],
   standalone: false,
 })
-export class ReportsPage implements OnInit {
+export class ReportsPage implements OnInit, AfterViewInit {
+  @ViewChild('dayChart') dayChartRef!: ElementRef<HTMLCanvasElement>;
+  @ViewChild('residentChart') residentChartRef!: ElementRef<HTMLCanvasElement>;
+
   logs: AccessLog[] = [];
   total = 0;
   residents: Resident[] = [];
@@ -20,6 +37,7 @@ export class ReportsPage implements OnInit {
   perDay: any[] = [];
   perResident: any[] = [];
 
+  // Filtros
   filters = {
     startDate: '',
     endDate: '',
@@ -27,9 +45,32 @@ export class ReportsPage implements OnInit {
     vehiclePlate: '',
   };
 
+  // Paginación
+  currentPage = 1;
+  pageSize = 10;
+  totalPages = 1;
+
+  // Estado
+  loading = false;
+  loadError = '';
+  dateError = '';
+
+  // Resumen
+  todayAccesses = 0;
+  pendingAccesses = 0;
+  vehiclesUsed = 0;
+
+  // Charts
+  private dayChart: Chart | null = null;
+  private residentChart: Chart | null = null;
+  private searchTimeout: any;
+
   constructor(
     private api: Api,
     private auth: Auth,
+    private toastController: ToastController,
+    private modalController: ModalController,
+    private alertController: AlertController,
   ) {}
 
   ngOnInit() {
@@ -37,52 +78,188 @@ export class ReportsPage implements OnInit {
     this.load();
   }
 
-  loadSelects() {
-    this.api
-      .getResidents('', 1, 200)
-      .subscribe((res) => (this.residents = res.data));
-    this.api
-      .getVehicles('', 1, 200)
-      .subscribe((res) => (this.vehicles = res.data));
-    this.api
-      .getVisitors('', 1, 200)
-      .subscribe((res) => (this.visitors = res.data));
+  ngAfterViewInit() {
+    // Los gráficos se inicializan después de cargar los datos
   }
 
-  load(): void {
-    const params: any = { page: 1, limit: 100 };
+  loadSelects() {
+    this.api.getResidents('', 1, 200).subscribe((res) => {
+      this.residents = res.data;
+    });
+    this.api.getVehicles('', 1, 200).subscribe((res) => {
+      this.vehicles = res.data;
+    });
+    this.api.getVisitors('', 1, 200).subscribe((res) => {
+      this.visitors = res.data;
+    });
+  }
+
+  load() {
+    // Validar fechas
+    if (this.filters.startDate && this.filters.endDate) {
+      const start = new Date(this.filters.startDate);
+      const end = new Date(this.filters.endDate);
+      if (start > end) {
+        this.dateError = 'La fecha "Desde" no puede ser posterior a "Hasta"';
+        return;
+      } else {
+        this.dateError = '';
+      }
+    } else {
+      this.dateError = '';
+    }
+
+    this.loading = true;
+    this.loadError = '';
+    const params: any = {
+      page: this.currentPage,
+      limit: this.pageSize,
+    };
     if (this.filters.startDate) params.startDate = this.filters.startDate;
     if (this.filters.endDate) params.endDate = this.filters.endDate;
     if (this.filters.residentId) params.residentId = this.filters.residentId;
     if (this.filters.vehiclePlate)
       params.vehiclePlate = this.filters.vehiclePlate;
 
-    console.log('Enviando parámetros:', params);
-
     this.api.getReport(params).subscribe({
       next: (result: any) => {
-        console.log('Resultado del reporte:', result);
-        // CORRECCIÓN: acceder a result.logs.data y result.logs.total
         this.logs = result.logs?.data || [];
         this.total = result.logs?.total || 0;
         this.perDay = result.perDay || [];
         this.perResident = result.perResident || [];
+        this.totalPages = Math.ceil(this.total / this.pageSize);
+        if (this.currentPage > this.totalPages) {
+          this.currentPage = 1;
+          this.load();
+          return;
+        }
+        this.calculateSummary();
+        this.renderCharts();
+        this.loading = false;
       },
       error: (err) => {
         console.error('Error en reportes:', err);
-        this.logs = [];
-        this.total = 0;
+        this.loadError = 'No se pudieron cargar los datos. Intenta nuevamente.';
+        this.loading = false;
       },
     });
   }
 
-  clear(): void {
+  calculateSummary() {
+    const now = new Date();
+    const todayStr = now.toISOString().split('T')[0];
+    this.todayAccesses = this.logs.filter((log) => {
+      const entryDate = new Date(log.entryDatetime).toISOString().split('T')[0];
+      return entryDate === todayStr;
+    }).length;
+    this.pendingAccesses = this.logs.filter((log) => !log.exitDatetime).length;
+    const uniqueVehicles = new Set(
+      this.logs.map((log) => log.vehicleId).filter((id) => id !== null),
+    );
+    this.vehiclesUsed = uniqueVehicles.size;
+  }
+
+  renderCharts() {
+    if (this.perDay.length > 0 && this.dayChartRef) {
+      if (this.dayChart) this.dayChart.destroy();
+      const ctx = this.dayChartRef.nativeElement.getContext('2d');
+      if (!ctx) return;
+      this.dayChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: this.perDay.map((item) => item.date),
+          datasets: [
+            {
+              label: 'Accesos',
+              data: this.perDay.map((item) => item.count),
+              backgroundColor: 'rgba(15, 118, 110, 0.6)',
+              borderColor: '#0f766e',
+              borderWidth: 1,
+            },
+          ],
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false },
+          },
+          scales: {
+            y: { beginAtZero: true, ticks: { stepSize: 1 } },
+          },
+        },
+      });
+    }
+
+    if (this.perResident.length > 0 && this.residentChartRef) {
+      if (this.residentChart) this.residentChart.destroy();
+      const ctx = this.residentChartRef.nativeElement.getContext('2d');
+      if (!ctx) return;
+      const topResidents = this.perResident.slice(0, 10);
+      this.residentChart = new Chart(ctx, {
+        type: 'pie',
+        data: {
+          labels: topResidents.map((item) => item.name),
+          datasets: [
+            {
+              data: topResidents.map((item) => item.count),
+              backgroundColor: [
+                '#0f766e',
+                '#0d9488',
+                '#14b8a6',
+                '#2dd4bf',
+                '#5eead4',
+                '#99f6e4',
+                '#ccfbf1',
+                '#f0fdfa',
+                '#e2e8f0',
+                '#cbd5e1',
+              ],
+            },
+          ],
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              position: 'bottom',
+              labels: { boxWidth: 12, font: { size: 10 } },
+            },
+          },
+        },
+      });
+    }
+  }
+
+  onFilterChange() {
+    this.currentPage = 1;
+    this.load();
+  }
+
+  onVehiclePlateChange() {
+    clearTimeout(this.searchTimeout);
+    this.searchTimeout = setTimeout(() => {
+      this.currentPage = 1;
+      this.load();
+    }, 400);
+  }
+
+  clearFilters() {
     this.filters = {
       startDate: '',
       endDate: '',
       residentId: null,
       vehiclePlate: '',
     };
+    this.currentPage = 1;
+    this.dateError = '';
+    this.load();
+  }
+
+  changePage(page: number) {
+    if (page < 1 || page > this.totalPages) return;
+    this.currentPage = page;
     this.load();
   }
 
@@ -101,41 +278,33 @@ export class ReportsPage implements OnInit {
     return visitor ? visitor.name : 'Sin visitante';
   }
 
+  async viewDetails(log: AccessLog) {
+    // Puedes abrir un modal con el detalle completo
+    const alert = await this.alertController.create({
+      header: `Acceso #${log.id}`,
+      message: `
+        Residente: ${this.getResidentName(log.residentId)}
+        Vehículo: ${this.getVehiclePlate(log.vehicleId)}
+        Visitante: ${this.getVisitorName(log.visitorId)}
+        Entrada: ${new Date(log.entryDatetime).toLocaleString()}
+        Salida: ${log.exitDatetime ? new Date(log.exitDatetime).toLocaleString() : 'Pendiente'}
+        Estado: ${log.exitDatetime ? 'Completado' : 'Pendiente'}
+      `,
+      buttons: ['Cerrar'],
+    });
+    await alert.present();
+  }
+
   exportReportPDF() {
     const doc = new jsPDF('landscape', 'mm', 'a4');
     const pageWidth = doc.internal.pageSize.getWidth();
 
-    // Cargar logo (usamos la imagen PNG)
-    const logoUrl = 'assets/icon/paraiso_Verde.png';
-    const img = new Image();
-    img.src = logoUrl;
-    // Esperar a que cargue (usamos un canvas para obtener la imagen)
-    const canvas = document.createElement('canvas');
-    const ctx = canvas.getContext('2d')!;
-    const imgElement = new Image();
-    imgElement.src = logoUrl;
-    imgElement.onload = () => {
-      canvas.width = imgElement.width;
-      canvas.height = imgElement.height;
-      ctx.drawImage(imgElement, 0, 0);
-      const imgData = canvas.toDataURL('image/png');
-      doc.addImage(imgData, 'PNG', 14, 10, 25, 25);
-      this.generatePDFContent(doc, pageWidth);
-    };
-    imgElement.onerror = () => {
-      // Si no carga la imagen, continuar sin logo
-      console.warn('No se pudo cargar el logo, continuando sin él.');
-      this.generatePDFContent(doc, pageWidth);
-    };
-  }
-
-  private generatePDFContent(doc: jsPDF, pageWidth: number) {
     // Título
-    doc.setFontSize(18);
+    doc.setFontSize(20);
     doc.text('Sistema Seguridad - Paraíso Verde', pageWidth / 2, 20, {
       align: 'center',
     });
-    doc.setFontSize(11);
+    doc.setFontSize(12);
     doc.text(
       `Reporte de accesos - Generado: ${new Date().toLocaleString()}`,
       pageWidth / 2,
@@ -149,7 +318,7 @@ export class ReportsPage implements OnInit {
       { align: 'center' },
     );
 
-    // Filtros aplicados
+    // Filtros
     let filterText = 'Todos los registros';
     if (this.filters.startDate && this.filters.endDate) {
       filterText = `Desde ${this.filters.startDate} hasta ${this.filters.endDate}`;
@@ -168,7 +337,13 @@ export class ReportsPage implements OnInit {
       filterText += ` · Placa: ${this.filters.vehiclePlate}`;
     }
     doc.setFontSize(10);
-    doc.text(`Filtro: ${filterText}`, 14, 42);
+    doc.text(`Filtro: ${filterText}`, 14, 44);
+
+    // Resumen
+    doc.setFontSize(11);
+    doc.text(`Total registros: ${this.total}`, 14, 52);
+    doc.text(`Accesos hoy: ${this.todayAccesses}`, 14, 58);
+    doc.text(`Pendientes: ${this.pendingAccesses}`, 14, 64);
 
     // Tabla
     const tableData = this.logs.map((log) => [
@@ -196,7 +371,7 @@ export class ReportsPage implements OnInit {
         ],
       ],
       body: tableData,
-      startY: 48,
+      startY: 72,
       styles: { fontSize: 8 },
       headStyles: { fillColor: [15, 118, 110] },
       alternateRowStyles: { fillColor: [245, 245, 245] },
@@ -220,5 +395,19 @@ export class ReportsPage implements OnInit {
     }
 
     doc.save('reporte_accesos.pdf');
+  }
+
+  private async toast(
+    message: string,
+    color: 'success' | 'danger' = 'success',
+  ) {
+    const toast = await this.toastController.create({
+      message,
+      color,
+      duration: 2500,
+      position: 'bottom',
+      buttons: [{ icon: 'close-outline', role: 'cancel' }],
+    });
+    await toast.present();
   }
 }
