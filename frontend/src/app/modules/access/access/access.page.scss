@@ -1,9 +1,178 @@
+// ============================================================
+//  ESTILOS BASE (para todos los dispositivos)
+// ============================================================
+
 .form-panel {
   padding: 16px;
   margin-bottom: 14px;
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+  border: 1px solid #e9edf2;
 }
 
-// --- RESPONSIVE: Mejoras para móviles ---
+// --- Formulario en grid (por defecto 2 columnas) ---
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+// --- Barra de herramientas (buscador + botón) ---
+.toolbar-row {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 14px;
+
+  ion-searchbar {
+    flex: 1;
+    --background: #ffffff;
+    --border-radius: 8px;
+    --box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    padding: 0;
+  }
+}
+
+// --- Tabla responsiva ---
+.data-card {
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+  border: 1px solid #e9edf2;
+  overflow: hidden;
+}
+
+.responsive-table {
+  width: 100%;
+  overflow-x: auto;
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 720px;
+    font-size: 14px;
+  }
+
+  th,
+  td {
+    padding: 12px 14px;
+    border-bottom: 1px solid #edf2f7;
+    text-align: left;
+    vertical-align: middle;
+  }
+
+  th {
+    background: #f8fafc;
+    color: #1e293b;
+    font-weight: 700;
+    text-transform: uppercase;
+    font-size: 11px;
+    letter-spacing: 0.05em;
+  }
+
+  td {
+    color: #1e293b;
+  }
+
+  .status-pill {
+    display: inline-flex;
+    align-items: center;
+    padding: 2px 12px;
+    border-radius: 999px;
+    background: #dcfce7;
+    color: #166534;
+    font-weight: 700;
+    font-size: 12px;
+
+    &.pending {
+      background: #fee2e2;
+      color: #991b1b;
+    }
+  }
+
+  .actions {
+    display: flex;
+    gap: 4px;
+    justify-content: flex-end;
+
+    ion-button {
+      --padding-start: 6px;
+      --padding-end: 6px;
+      --min-height: 28px;
+      font-size: 12px;
+      --border-radius: 6px;
+    }
+  }
+}
+
+.empty-state {
+  padding: 40px 16px;
+  text-align: center;
+  color: #94a3b8;
+}
+
+// --- Paginación ---
+.pagination-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 12px 8px;
+  flex-wrap: wrap;
+  border-top: 1px solid #edf2f7;
+
+  ion-button {
+    --padding-start: 8px;
+    --padding-end: 8px;
+    --min-height: 32px;
+    font-size: 14px;
+    font-weight: 600;
+    --border-radius: 6px;
+  }
+
+  .page-info {
+    font-size: 13px;
+    color: #64748b;
+    margin-left: 8px;
+    padding: 4px 12px;
+    background: #f1f5f9;
+    border-radius: 6px;
+    white-space: nowrap;
+  }
+}
+
+// ============================================================
+//  BREAKPOINT: TABLETS Y PANTALLAS MEDIANAS (≤ 1024px)
+// ============================================================
+
+@media (max-width: 1024px) {
+  .form-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  .responsive-table table {
+    min-width: 640px;
+    font-size: 13px;
+  }
+
+  th,
+  td {
+    padding: 10px 12px;
+  }
+}
+
+// ============================================================
+//  BREAKPOINT: MÓVILES GRANDES / TABLETS PEQUEÑAS (≤ 768px)
+// ============================================================
 
 @media (max-width: 768px) {
   .page-wrap {
@@ -17,6 +186,7 @@
     font-size: 13px;
   }
 
+  // --- Formulario: una sola columna ---
   .form-grid {
     grid-template-columns: 1fr;
     gap: 8px;
@@ -31,6 +201,7 @@
     }
   }
 
+  // --- Barra de herramientas vertical ---
   .toolbar-row {
     flex-direction: column;
     gap: 8px;
@@ -42,21 +213,23 @@
     }
   }
 
-  // Ocultar columnas menos importantes en móvil
+  // --- Tabla: ocultar columnas menos importantes ---
   .responsive-table {
     .hide-mobile {
       display: none !important;
     }
+
     table {
       min-width: 480px;
       font-size: 13px;
     }
+
     th,
     td {
       padding: 8px 10px;
     }
+
     .actions {
-      display: flex;
       flex-direction: column;
       gap: 4px;
       ion-button {
@@ -67,10 +240,44 @@
       }
     }
   }
+
+  // --- Paginación: botones más pequeños ---
+  .pagination-container {
+    gap: 2px;
+    ion-button {
+      --padding-start: 6px;
+      --padding-end: 6px;
+      font-size: 12px;
+      --min-height: 28px;
+    }
+    .page-info {
+      font-size: 11px;
+      padding: 2px 8px;
+    }
+  }
 }
 
-// Mejoras para pantallas muy pequeñas
+// ============================================================
+//  BREAKPOINT: MÓVILES PEQUEÑOS (≤ 480px)
+// ============================================================
+
 @media (max-width: 480px) {
+  .page-wrap {
+    padding: 8px 4px 16px;
+  }
+
+  .page-title h1 {
+    font-size: 18px;
+  }
+  .page-title p {
+    font-size: 12px;
+  }
+
+  .form-panel {
+    padding: 12px;
+  }
+
+  // --- Tabla: aún más compacta ---
   .responsive-table {
     table {
       min-width: 380px;
@@ -80,51 +287,53 @@
     td {
       padding: 6px 6px;
     }
+
     .status-pill {
       font-size: 10px;
       padding: 1px 8px;
     }
+
     .actions ion-button {
       font-size: 10px;
+      --padding-start: 4px;
+      --padding-end: 4px;
+    }
+  }
+
+  // --- Paginación: aún más compacta ---
+  .pagination-container {
+    gap: 2px;
+    ion-button {
+      --padding-start: 4px;
+      --padding-end: 4px;
+      font-size: 11px;
+      --min-height: 24px;
+    }
+    .page-info {
+      font-size: 10px;
+      padding: 2px 6px;
     }
   }
 }
 
-// Estilos para la paginación
-.pagination-container {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 4px;
-  padding: 12px 8px;
-  flex-wrap: wrap;
+// ============================================================
+//  BREAKPOINT: PANTALLAS GRANDES (> 1024px) - ya está bien
+// ============================================================
 
-  ion-button {
-    --padding-start: 8px;
-    --padding-end: 8px;
-    --min-height: 32px;
-    font-size: 14px;
-    font-weight: 600;
-  }
+// ============================================================
+//  MEJORAS ADICIONALES: TABLA CON SCROLL SUAVE
+// ============================================================
 
-  .page-info {
-    font-size: 13px;
-    color: #64748b;
-    margin-left: 8px;
-    padding: 4px 8px;
-    background: #f1f5f9;
-    border-radius: 6px;
-  }
-
-  @media (max-width: 480px) {
-    ion-button {
-      --padding-start: 4px;
-      --padding-end: 4px;
-      font-size: 12px;
-      --min-height: 28px;
-    }
-    .page-info {
-      font-size: 11px;
-    }
-  }
+.responsive-table::-webkit-scrollbar {
+  height: 6px;
+}
+.responsive-table::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+.responsive-table::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 3px;
+}
+.responsive-table::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
 }
