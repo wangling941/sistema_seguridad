@@ -26,11 +26,11 @@
     <div class="toolbar-row">
       <ion-searchbar
         [(ngModel)]="search"
-        (ionInput)="load()"
+        (ionInput)="onSearch($event)"
         placeholder="Buscar por nombre o DNI"
         class="search-input"
       ></ion-searchbar>
-      <ion-button fill="outline" (click)="load()">
+      <ion-button fill="outline" (click)="load(currentPage)">
         <ion-icon slot="start" name="refresh-outline"></ion-icon>
         Actualizar
       </ion-button>
@@ -138,6 +138,40 @@
       <div class="loading-state" *ngIf="loading">
         <ion-spinner name="crescent"></ion-spinner>
         <p>Cargando...</p>
+      </div>
+
+      <!-- Paginación -->
+      <div class="pagination-container" *ngIf="totalPages > 1 && !loading">
+        <div class="pagination">
+          <button
+            class="page-btn"
+            (click)="previousPage()"
+            [disabled]="currentPage === 1"
+          >
+            <ion-icon name="chevron-back-outline"></ion-icon>
+          </button>
+
+          <button
+            class="page-btn"
+            *ngFor="let p of pages"
+            [class.active]="p === currentPage"
+            (click)="goToPage(p)"
+          >
+            {{ p }}
+          </button>
+
+          <button
+            class="page-btn"
+            (click)="nextPage()"
+            [disabled]="currentPage === totalPages"
+          >
+            <ion-icon name="chevron-forward-outline"></ion-icon>
+          </button>
+        </div>
+
+        <div class="page-info">
+          Página {{ currentPage }} de {{ totalPages }} ({{ total }} registros)
+        </div>
       </div>
     </section>
   </div>

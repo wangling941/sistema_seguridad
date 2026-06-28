@@ -204,7 +204,7 @@
   }
 }
 
-/* --- Estado vacío y carga --- */
+/* --- Estados vacío y carga --- */
 .empty-state,
 .loading-state {
   text-align: center;
@@ -241,5 +241,75 @@
   &.inactive {
     background: #fee2e2;
     color: #dc2626;
+  }
+}
+
+/* --- Paginación --- */
+.pagination-container {
+  margin-top: 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  border-top: 1px solid #f1f5f9;
+  padding-top: 20px;
+
+  @media (min-width: 640px) {
+    flex-direction: row;
+    justify-content: space-between;
+  }
+}
+
+.pagination {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+  flex-wrap: wrap;
+  justify-content: center;
+
+  .page-btn {
+    min-width: 36px;
+    height: 36px;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    background: white;
+    color: #0f172a;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 8px;
+
+    &:hover:not(:disabled) {
+      background: #f1f5f9;
+    }
+
+    &:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    &.active {
+      background: #0a5c2e;
+      border-color: #0a5c2e;
+      color: white;
+    }
+
+    ion-icon {
+      font-size: 1.1rem;
+    }
+  }
+}
+
+.page-info {
+  color: #64748b;
+  font-size: 0.85rem;
+  text-align: center;
+
+  @media (min-width: 640px) {
+    text-align: right;
   }
 }

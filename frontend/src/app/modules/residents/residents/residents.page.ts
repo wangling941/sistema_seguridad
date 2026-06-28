@@ -21,6 +21,14 @@ export class ResidentsPage implements OnInit {
   search = '';
   loading = false;
 
+  // Paginación
+  currentPage = 1;
+  itemsPerPage = 10;
+  totalPages = 1;
+
+  // Array de páginas para mostrar
+  pages: number[] = [];
+
   constructor(
     private api: Api,
     private modalController: ModalController,
@@ -32,20 +40,67 @@ export class ResidentsPage implements OnInit {
     this.load();
   }
 
-  load(): void {
+  load(page: number = this.currentPage): void {
     this.loading = true;
+    this.currentPage = page;
+
     this.api
-      .getResidents(this.search, 1, 50)
+      .getResidents(this.search, page, this.itemsPerPage)
       .pipe(finalize(() => (this.loading = false)))
       .subscribe({
         next: (result) => {
           this.residents = result.data;
           this.total = result.total;
+          this.totalPages = Math.ceil(this.total / this.itemsPerPage);
+          this.generatePages();
         },
-        error: (err) => {
+        error: () => {
           this.toast('Error al cargar residentes', 'danger');
         },
       });
+  }
+
+  // Generar array de páginas para mostrar
+  private generatePages(): void {
+    const pages: number[] = [];
+    const maxVisible = 5;
+    let start = Math.max(1, this.currentPage - 2);
+    let end = Math.min(this.totalPages, start + maxVisible - 1);
+
+    if (end - start < maxVisible - 1) {
+      start = Math.max(1, end - maxVisible + 1);
+    }
+
+    for (let i = start; i <= end; i++) {
+      pages.push(i);
+    }
+    this.pages = pages;
+  }
+
+  // Cambiar a una página específica
+  goToPage(page: number): void {
+    if (page < 1 || page > this.totalPages || page === this.currentPage) return;
+    this.load(page);
+  }
+
+  // Página anterior
+  previousPage(): void {
+    if (this.currentPage > 1) {
+      this.goToPage(this.currentPage - 1);
+    }
+  }
+
+  // Página siguiente
+  nextPage(): void {
+    if (this.currentPage < this.totalPages) {
+      this.goToPage(this.currentPage + 1);
+    }
+  }
+
+  // Al buscar, resetear a página 1
+  onSearch(event: any): void {
+    this.currentPage = 1;
+    this.load(1);
   }
 
   async openForm(resident?: Resident): Promise<void> {
@@ -53,12 +108,14 @@ export class ResidentsPage implements OnInit {
       component: ResidentFormComponent,
       componentProps: { resident },
     });
-    modal.onWillDismiss().then(() => this.load());
+    modal.onWillDismiss().then(() => {
+      // Recargar manteniendo la página actual
+      this.load(this.currentPage);
+    });
     await modal.present();
   }
 
   async deleteResident(resident: Resident): Promise<void> {
-    // Mensaje sin etiquetas HTML – usamos el header para el nombre
     const alert = await this.alertController.create({
       header: `Eliminar a "${resident.name}"`,
       message: `¿Estás seguro de que deseas eliminar este residente? Esta acción no se puede deshacer.`,
@@ -74,7 +131,7 @@ export class ResidentsPage implements OnInit {
             this.api.deleteResident(resident.id).subscribe({
               next: () => {
                 this.toast('Residente eliminado correctamente', 'success');
-                this.load();
+                this.load(this.currentPage);
               },
               error: () => {
                 this.toast('No se pudo eliminar el residente', 'danger');
