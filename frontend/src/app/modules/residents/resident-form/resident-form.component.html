@@ -11,39 +11,61 @@
 
 <ion-content>
   <form [formGroup]="form" (ngSubmit)="save()">
+    <!-- Nombre -->
     <ion-item>
-      <ion-label position="floating">Nombre</ion-label>
-      <ion-input formControlName="name"></ion-input>
+      <ion-label position="floating"> Nombre *</ion-label>
+      <ion-input formControlName="name" type="text"></ion-input>
     </ion-item>
-    <ion-item *ngIf="form.get('name')?.invalid && form.get('name')?.touched">
-      <ion-text color="danger"
-        >El nombre solo puede contener letras y espacios.</ion-text
-      >
+    <ion-item
+      lines="none"
+      *ngIf="form.get('name')?.invalid && form.get('name')?.touched"
+    >
+      <ion-text color="danger" class="error-text">
+        <ion-icon name="alert-circle-outline" slot="start"></ion-icon>
+        El nombre solo puede contener letras y espacios.
+      </ion-text>
     </ion-item>
 
+    <!-- DNI -->
     <ion-item>
-      <ion-label position="floating">DNI</ion-label>
-      <ion-input formControlName="dni"></ion-input>
+      <ion-label position="floating"> DNI *</ion-label>
+      <ion-input formControlName="dni" type="text" maxlength="8"></ion-input>
     </ion-item>
-    <ion-item *ngIf="form.get('dni')?.invalid && form.get('dni')?.touched">
-      <ion-text color="danger"
-        >El DNI debe tener exactamente 8 dígitos numéricos.</ion-text
-      >
+    <ion-item
+      lines="none"
+      *ngIf="form.get('dni')?.invalid && form.get('dni')?.touched"
+    >
+      <ion-text color="danger" class="error-text">
+        <ion-icon name="alert-circle-outline" slot="start"></ion-icon>
+        El DNI debe tener exactamente 8 dígitos numéricos.
+      </ion-text>
     </ion-item>
 
+    <!-- Estado -->
     <ion-item>
-      <ion-label>Estado</ion-label>
-      <ion-select formControlName="status">
+      <ion-label> Estado</ion-label>
+      <ion-select formControlName="status" interface="popover">
         <ion-select-option value="active">Activo</ion-select-option>
         <ion-select-option value="inactive">Inactivo</ion-select-option>
       </ion-select>
     </ion-item>
 
-    <div class="form-actions" style="padding: 16px">
-      <ion-button fill="clear" color="medium" (click)="dismiss()"
-        >Cancelar</ion-button
+    <!-- Botones -->
+    <div class="form-actions">
+      <ion-button
+        fill="clear"
+        color="medium"
+        (click)="dismiss()"
+        expand="block"
       >
-      <ion-button type="submit" [disabled]="form.invalid">
+        Cancelar
+      </ion-button>
+      <ion-button
+        type="submit"
+        [disabled]="form.invalid"
+        expand="block"
+        shape="round"
+      >
         {{ resident ? "Actualizar" : "Crear" }}
       </ion-button>
     </div>

@@ -11,7 +11,7 @@ import { ResidentDetailComponent } from '../resident-detail/resident-detail.comp
   imports: [
     CommonModule,
     FormsModule,
-    ReactiveFormsModule, // <-- AGREGADO
+    ReactiveFormsModule,
     IonicModule,
     ResidentsPageRoutingModule,
   ],

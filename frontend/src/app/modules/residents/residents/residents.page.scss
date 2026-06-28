@@ -1,4 +1,245 @@
-.form-panel {
+.app-surface {
+  --background: #f8fafc;
+}
+
+.page-wrap {
+  max-width: 1200px;
+  margin: 0 auto;
   padding: 16px;
-  margin-bottom: 14px;
+
+  @media (min-width: 768px) {
+    padding: 24px;
+  }
+}
+
+.page-title {
+  margin-bottom: 20px;
+
+  h1 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #0f172a;
+    margin: 0 0 2px 0;
+
+    @media (min-width: 768px) {
+      font-size: 2rem;
+    }
+  }
+
+  p {
+    margin: 0;
+    color: #64748b;
+    font-size: 0.9rem;
+  }
+}
+
+.toolbar-row {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 24px;
+
+  @media (min-width: 640px) {
+    flex-direction: row;
+    align-items: center;
+  }
+
+  .search-input {
+    flex: 1;
+    --border-radius: 12px;
+  }
+
+  ion-button {
+    flex-shrink: 0;
+  }
+}
+
+.data-card {
+  background: white;
+  border-radius: 20px;
+  padding: 16px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
+  overflow: hidden;
+
+  @media (min-width: 768px) {
+    padding: 24px;
+  }
+}
+
+/* --- Tabla (escritorio) --- */
+.desktop-table {
+  display: none;
+
+  @media (min-width: 768px) {
+    display: block;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+
+    thead {
+      background: #f8fafc;
+      border-radius: 12px;
+
+      th {
+        padding: 12px 16px;
+        text-align: left;
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        color: #475569;
+        letter-spacing: 0.3px;
+      }
+    }
+
+    tbody {
+      tr {
+        border-bottom: 1px solid #f1f5f9;
+        transition: background 0.15s;
+
+        &:hover {
+          background: #fafbfc;
+        }
+
+        td {
+          padding: 12px 16px;
+          font-size: 0.9rem;
+          color: #0f172a;
+          vertical-align: middle;
+        }
+
+        .actions {
+          display: flex;
+          justify-content: flex-end;
+          gap: 4px;
+        }
+      }
+    }
+  }
+}
+
+/* --- Tarjetas (móvil/tablet) --- */
+.mobile-cards {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+
+  @media (min-width: 480px) {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  @media (min-width: 768px) {
+    display: none;
+  }
+
+  .resident-card {
+    background: #fafbfc;
+    border-radius: 16px;
+    padding: 16px;
+    border: 1px solid #e9edf2;
+    transition: all 0.2s;
+
+    &:hover {
+      background: white;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+
+      .resident-name {
+        font-weight: 700;
+        font-size: 1.05rem;
+        color: #0f172a;
+      }
+    }
+
+    .card-body {
+      margin-bottom: 16px;
+
+      .card-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 4px 0;
+        border-bottom: 1px solid #f1f5f9;
+
+        &:last-child {
+          border-bottom: none;
+        }
+
+        .label {
+          color: #64748b;
+          font-size: 0.8rem;
+          font-weight: 500;
+        }
+        .value {
+          color: #0f172a;
+          font-size: 0.9rem;
+          font-weight: 500;
+        }
+      }
+    }
+
+    .card-actions {
+      display: flex;
+      gap: 8px;
+      justify-content: flex-end;
+
+      ion-button {
+        --padding-start: 12px;
+        --padding-end: 12px;
+        --border-radius: 20px;
+        font-weight: 600;
+        font-size: 0.8rem;
+
+        &[color="danger"] {
+          --color: #dc2626;
+        }
+      }
+    }
+  }
+}
+
+/* --- Estado vacío y carga --- */
+.empty-state,
+.loading-state {
+  text-align: center;
+  padding: 40px 20px;
+  color: #94a3b8;
+
+  ion-icon {
+    font-size: 48px;
+    margin-bottom: 12px;
+    color: #cbd5e1;
+  }
+
+  p {
+    font-size: 1rem;
+    margin: 0 0 16px 0;
+  }
+}
+
+.loading-state {
+  padding: 60px 20px;
+}
+
+/* --- Píldora de estado --- */
+.status-pill {
+  display: inline-block;
+  padding: 4px 14px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  background: #dcfce7;
+  color: #16a34a;
+
+  &.inactive {
+    background: #fee2e2;
+    color: #dc2626;
+  }
 }

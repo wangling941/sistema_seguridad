@@ -35,15 +35,25 @@ export class ResidentFormComponent implements OnInit {
   }
 
   save(): void {
-    if (this.form.invalid) return;
+    if (this.form.invalid) {
+      // Marcar todos los campos como tocados para mostrar errores
+      this.form.markAllAsTouched();
+      return;
+    }
+
     const data = this.form.value;
     const obs = this.resident
       ? this.api.updateResident(this.resident.id, data)
       : this.api.createResident(data);
 
     obs.subscribe({
-      next: () => this.modalController.dismiss(true),
-      error: () => alert('Error al guardar'),
+      next: () => {
+        this.modalController.dismiss(true);
+      },
+      error: () => {
+        // Podrías mostrar un toast aquí
+        console.error('Error al guardar');
+      },
     });
   }
 
