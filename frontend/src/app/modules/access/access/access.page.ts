@@ -19,6 +19,12 @@ export class AccessPage implements OnInit {
   search = '';
   total = 0;
   loading = false;
+  page = 1;
+  limit = 10;
+
+  // Exponer Math para usar en la plantilla
+  public Math = Math;
+
   entryType: 'resident' | 'vehicle' | 'visitor' = 'resident';
 
   form: {
@@ -58,7 +64,7 @@ export class AccessPage implements OnInit {
   load() {
     this.loading = true;
     this.api
-      .getAccessLogs(this.search, 1, 50)
+      .getAccessLogs(this.search, this.page, this.limit)
       .pipe(finalize(() => (this.loading = false)))
       .subscribe((result) => {
         this.logs = result.data;
@@ -81,6 +87,14 @@ export class AccessPage implements OnInit {
       this.form.vehicleId = null;
     } else {
       this.filteredVehicles = this.vehicles;
+    }
+  }
+
+  onVisitorChange() {
+    // Opcional: mostrar toast si el visitante tiene vehículo
+    const visitor = this.visitors.find((v) => v.id === this.form.visitorId);
+    if (visitor && visitor.hasVehicle && visitor.vehiclePlate) {
+      // No es necesario hacer nada, solo mostramos la placa en la tabla
     }
   }
 
@@ -159,19 +173,62 @@ export class AccessPage implements OnInit {
     await alert.present();
   }
 
+  nextPage() {
+    if (this.page * this.limit < this.total) {
+      this.page++;
+      this.load();
+    }
+  }
+
+  prevPage() {
+    if (this.page > 1) {
+      this.page--;
+      this.load();
+    }
+  }
+
+  goToPage(page: number) {
+    this.page = page;
+    this.load();
+  }
+
   getResidentName(id: number | null): string {
     const resident = this.residents.find((r) => r.id === id);
     return resident ? resident.name : 'Sin residente';
   }
 
-  getVehiclePlate(id: number | null): string {
-    const vehicle = this.vehicles.find((v) => v.id === id);
-    return vehicle ? vehicle.plate : 'Sin vehículo';
+  getVehiclePlate(log: AccessLog): string {
+    if (log.vehicleId) {
+      const vehicle = this.vehicles.find((v) => v.id === log.vehicleId);
+      return vehicle ? vehicle.plate : 'Sin vehículo';
+    }
+    if (log.visitorId) {
+      const visitor = this.visitors.find((v) => v.id === log.visitorId);
+      if (visitor && visitor.hasVehicle && visitor.vehiclePlate) {
+        return visitor.vehiclePlate;
+      }
+    }
+    return 'Sin vehículo';
   }
 
   getVisitorName(id: number | null): string {
     const visitor = this.visitors.find((v) => v.id === id);
     return visitor ? visitor.name : 'Sin visitante';
+  }
+
+  getPages(): number[] {
+    const totalPages = Math.ceil(this.total / this.limit);
+    const pages: number[] = [];
+    const maxVisible = 5;
+    let start = Math.max(1, this.page - Math.floor(maxVisible / 2));
+    let end = Math.min(totalPages, start + maxVisible - 1);
+    if (end - start + 1 < maxVisible) {
+      start = Math.max(1, end - maxVisible + 1);
+    }
+    for (let i = start; i <= end; i++) {
+      pages.push(i);
+    }
+    return pages;
   }
 
   private async toast(

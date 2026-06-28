@@ -65,12 +65,16 @@
             label="Visitante"
             labelPlacement="stacked"
             [(ngModel)]="form.visitorId"
+            (ionChange)="onVisitorChange()"
           >
             <ion-select-option [value]="null"
               >Seleccionar visitante</ion-select-option
             >
             <ion-select-option *ngFor="let vis of visitors" [value]="vis.id">
               {{ vis.name }} ({{ vis.dni }})
+              <span *ngIf="vis.hasVehicle && vis.vehiclePlate">
+                - Vehículo: {{ vis.vehiclePlate }}
+              </span>
             </ion-select-option>
           </ion-select>
         </ion-item>
@@ -105,8 +109,8 @@
             <tr>
               <th>ID</th>
               <th class="hide-mobile">Residente</th>
-              <th class="hide-mobile">Vehículo</th>
-              <th>Visitante</th>
+              <th>Vehículo</th>
+              <th class="hide-mobile">Visitante</th>
               <th class="hide-mobile">Entrada</th>
               <th>Salida</th>
               <th>Estado</th>
@@ -117,8 +121,8 @@
             <tr *ngFor="let log of logs">
               <td>#{{ log.id }}</td>
               <td class="hide-mobile">{{ getResidentName(log.residentId) }}</td>
-              <td class="hide-mobile">{{ getVehiclePlate(log.vehicleId) }}</td>
-              <td>{{ getVisitorName(log.visitorId) }}</td>
+              <td>{{ getVehiclePlate(log) }}</td>
+              <td class="hide-mobile">{{ getVisitorName(log.visitorId) }}</td>
               <td class="hide-mobile">
                 {{ log.entryDatetime | date:'short' }}
               </td>
@@ -156,6 +160,34 @@
       <ng-template #empty>
         <div class="empty-state">No hay accesos para mostrar.</div>
       </ng-template>
+
+      <!-- Paginación -->
+      <div class="pagination-container" *ngIf="total > limit">
+        <ion-button fill="clear" [disabled]="page === 1" (click)="prevPage()">
+          <ion-icon slot="icon-only" name="chevron-back-outline"></ion-icon>
+        </ion-button>
+
+        <ion-button
+          *ngFor="let p of getPages()"
+          fill="clear"
+          [color]="p === page ? 'primary' : 'medium'"
+          (click)="goToPage(p)"
+        >
+          {{ p }}
+        </ion-button>
+
+        <ion-button
+          fill="clear"
+          [disabled]="page * limit >= total"
+          (click)="nextPage()"
+        >
+          <ion-icon slot="icon-only" name="chevron-forward-outline"></ion-icon>
+        </ion-button>
+
+        <span class="page-info">
+          Página {{ page }} de {{ Math.ceil(total / limit) }}
+        </span>
+      </div>
     </section>
   </div>
 </ion-content>
