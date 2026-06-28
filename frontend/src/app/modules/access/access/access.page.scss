@@ -11,7 +11,6 @@
   border: 1px solid #e9edf2;
 }
 
-// --- Formulario en grid (por defecto 2 columnas) ---
 .form-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
@@ -25,7 +24,6 @@
   margin-top: 14px;
 }
 
-// --- Barra de herramientas (buscador + botón) ---
 .toolbar-row {
   display: flex;
   gap: 12px;
@@ -41,7 +39,10 @@
   }
 }
 
-// --- Tabla responsiva ---
+// ============================================================
+//  ESTILOS DE TABLA (escritorio y tablets)
+// ============================================================
+
 .data-card {
   background: #ffffff;
   border-radius: 12px;
@@ -113,13 +114,107 @@
   }
 }
 
-.empty-state {
-  padding: 40px 16px;
-  text-align: center;
-  color: #94a3b8;
+// ============================================================
+//  ESTILOS DE TARJETAS (solo para móviles)
+// ============================================================
+
+.card-view {
+  display: none; // Oculto por defecto (se muestra en móvil)
 }
 
-// --- Paginación ---
+.access-card {
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+  border: 1px solid #e9edf2;
+  margin-bottom: 12px;
+  padding: 14px 16px;
+  transition: box-shadow 0.2s ease;
+
+  &:hover {
+    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.1);
+  }
+
+  .card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #f1f5f9;
+
+    .card-id {
+      font-weight: 800;
+      font-size: 16px;
+      color: #0b1720;
+    }
+
+    .status-pill {
+      display: inline-flex;
+      align-items: center;
+      padding: 2px 12px;
+      border-radius: 999px;
+      background: #dcfce7;
+      color: #166534;
+      font-weight: 700;
+      font-size: 11px;
+
+      &.pending {
+        background: #fee2e2;
+        color: #991b1b;
+      }
+    }
+  }
+
+  .card-body {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+
+    .card-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 13px;
+      padding: 2px 0;
+
+      .card-label {
+        color: #64748b;
+        font-weight: 600;
+        flex-shrink: 0;
+      }
+
+      .card-value {
+        color: #0b1720;
+        font-weight: 500;
+        text-align: right;
+        word-break: break-word;
+        max-width: 60%;
+      }
+    }
+  }
+
+  .card-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 6px;
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid #f1f5f9;
+
+    ion-button {
+      --padding-start: 8px;
+      --padding-end: 8px;
+      --min-height: 32px;
+      font-size: 12px;
+      --border-radius: 6px;
+    }
+  }
+}
+
+// ============================================================
+//  PAGINACIÓN (compartida)
+// ============================================================
+
 .pagination-container {
   display: flex;
   align-items: center;
@@ -150,7 +245,7 @@
 }
 
 // ============================================================
-//  BREAKPOINT: TABLETS Y PANTALLAS MEDIANAS (≤ 1024px)
+//  RESPONSIVE: TABLETS Y PANTALLAS MEDIANAS (≤ 1024px)
 // ============================================================
 
 @media (max-width: 1024px) {
@@ -171,7 +266,7 @@
 }
 
 // ============================================================
-//  BREAKPOINT: MÓVILES GRANDES / TABLETS PEQUEÑAS (≤ 768px)
+//  RESPONSIVE: MÓVILES (≤ 768px) - AQUÍ CAMBIA A TARJETAS
 // ============================================================
 
 @media (max-width: 768px) {
@@ -186,7 +281,7 @@
     font-size: 13px;
   }
 
-  // --- Formulario: una sola columna ---
+  // --- Formulario: una columna ---
   .form-grid {
     grid-template-columns: 1fr;
     gap: 8px;
@@ -213,35 +308,16 @@
     }
   }
 
-  // --- Tabla: ocultar columnas menos importantes ---
-  .responsive-table {
-    .hide-mobile {
-      display: none !important;
-    }
-
-    table {
-      min-width: 480px;
-      font-size: 13px;
-    }
-
-    th,
-    td {
-      padding: 8px 10px;
-    }
-
-    .actions {
-      flex-direction: column;
-      gap: 4px;
-      ion-button {
-        --padding-start: 6px;
-        --padding-end: 6px;
-        --min-height: 28px;
-        font-size: 11px;
-      }
-    }
+  // --- OCULTAR TABLA Y MOSTRAR TARJETAS ---
+  .table-view {
+    display: none !important;
   }
 
-  // --- Paginación: botones más pequeños ---
+  .card-view {
+    display: block !important;
+  }
+
+  // --- Ajustes de paginación en móvil ---
   .pagination-container {
     gap: 2px;
     ion-button {
@@ -255,10 +331,22 @@
       padding: 2px 8px;
     }
   }
+
+  // --- Ocultar paginación de escritorio en móvil ---
+  .desktop-pagination {
+    display: none !important;
+  }
+
+  // --- Mostrar paginación de móvil ---
+  .mobile-pagination {
+    display: flex !important;
+    border-top: none;
+    padding-top: 4px;
+  }
 }
 
 // ============================================================
-//  BREAKPOINT: MÓVILES PEQUEÑOS (≤ 480px)
+//  RESPONSIVE: MÓVILES PEQUEÑOS (≤ 480px)
 // ============================================================
 
 @media (max-width: 480px) {
@@ -277,30 +365,26 @@
     padding: 12px;
   }
 
-  // --- Tabla: aún más compacta ---
-  .responsive-table {
-    table {
-      min-width: 380px;
+  .access-card {
+    padding: 12px 14px;
+
+    .card-header .card-id {
+      font-size: 14px;
+    }
+
+    .card-body .card-row {
+      font-size: 12px;
+      padding: 3px 0;
+    }
+
+    .card-actions ion-button {
       font-size: 11px;
-    }
-    th,
-    td {
-      padding: 6px 6px;
-    }
-
-    .status-pill {
-      font-size: 10px;
-      padding: 1px 8px;
-    }
-
-    .actions ion-button {
-      font-size: 10px;
-      --padding-start: 4px;
-      --padding-end: 4px;
+      --padding-start: 6px;
+      --padding-end: 6px;
+      --min-height: 28px;
     }
   }
 
-  // --- Paginación: aún más compacta ---
   .pagination-container {
     gap: 2px;
     ion-button {
@@ -317,11 +401,11 @@
 }
 
 // ============================================================
-//  BREAKPOINT: PANTALLAS GRANDES (> 1024px) - ya está bien
+//  RESPONSIVE: PANTALLAS GRANDES (> 1024px) - ya está bien
 // ============================================================
 
 // ============================================================
-//  MEJORAS ADICIONALES: TABLA CON SCROLL SUAVE
+//  SCROLLBAR PERSONALIZADO
 // ============================================================
 
 .responsive-table::-webkit-scrollbar {

@@ -101,8 +101,10 @@
       </ion-button>
     </div>
 
-    <!-- Tabla de accesos -->
-    <section class="data-card">
+    <!-- ========================================================== -->
+    <!--  VISTA DE TABLA (para tablets y escritorio)                 -->
+    <!-- ========================================================== -->
+    <section class="data-card table-view">
       <div class="responsive-table" *ngIf="logs.length; else empty">
         <table>
           <thead>
@@ -161,8 +163,11 @@
         <div class="empty-state">No hay accesos para mostrar.</div>
       </ng-template>
 
-      <!-- Paginación -->
-      <div class="pagination-container" *ngIf="total > limit">
+      <!-- Paginación (visible en escritorio) -->
+      <div
+        class="pagination-container desktop-pagination"
+        *ngIf="total > limit"
+      >
         <ion-button fill="clear" [disabled]="page === 1" (click)="prevPage()">
           <ion-icon slot="icon-only" name="chevron-back-outline"></ion-icon>
         </ion-button>
@@ -189,5 +194,100 @@
         </span>
       </div>
     </section>
+
+    <!-- ========================================================== -->
+    <!--  VISTA DE TARJETAS (solo para móviles)                      -->
+    <!-- ========================================================== -->
+    <section class="card-view" *ngIf="logs.length; else emptyMobile">
+      <div class="access-card" *ngFor="let log of logs">
+        <div class="card-header">
+          <span class="card-id">#{{ log.id }}</span>
+          <span class="status-pill" [class.pending]="!log.exitDatetime">
+            {{ log.exitDatetime ? 'Completado' : 'Pendiente' }}
+          </span>
+        </div>
+
+        <div class="card-body">
+          <div class="card-row">
+            <span class="card-label">Residente:</span>
+            <span class="card-value"
+              >{{ getResidentName(log.residentId) }}</span
+            >
+          </div>
+          <div class="card-row">
+            <span class="card-label">Vehículo:</span>
+            <span class="card-value">{{ getVehiclePlate(log) }}</span>
+          </div>
+          <div class="card-row">
+            <span class="card-label">Visitante:</span>
+            <span class="card-value">{{ getVisitorName(log.visitorId) }}</span>
+          </div>
+          <div class="card-row">
+            <span class="card-label">Entrada:</span>
+            <span class="card-value"
+              >{{ log.entryDatetime | date:'short' }}</span
+            >
+          </div>
+          <div class="card-row">
+            <span class="card-label">Salida:</span>
+            <span class="card-value">
+              {{ log.exitDatetime ? (log.exitDatetime | date:'short') :
+              'Pendiente' }}
+            </span>
+          </div>
+        </div>
+
+        <div class="card-actions">
+          <ion-button
+            size="small"
+            [disabled]="!!log.exitDatetime"
+            (click)="registerExit(log)"
+          >
+            <ion-icon slot="start" name="log-out-outline"></ion-icon>
+            Salida
+          </ion-button>
+          <ion-button
+            size="small"
+            color="danger"
+            fill="clear"
+            (click)="deleteAccess(log)"
+          >
+            <ion-icon slot="icon-only" name="trash-outline"></ion-icon>
+          </ion-button>
+        </div>
+      </div>
+
+      <!-- Paginación (visible en móvil) -->
+      <div class="pagination-container mobile-pagination" *ngIf="total > limit">
+        <ion-button fill="clear" [disabled]="page === 1" (click)="prevPage()">
+          <ion-icon slot="icon-only" name="chevron-back-outline"></ion-icon>
+        </ion-button>
+
+        <ion-button
+          *ngFor="let p of getPages()"
+          fill="clear"
+          [color]="p === page ? 'primary' : 'medium'"
+          (click)="goToPage(p)"
+        >
+          {{ p }}
+        </ion-button>
+
+        <ion-button
+          fill="clear"
+          [disabled]="page * limit >= total"
+          (click)="nextPage()"
+        >
+          <ion-icon slot="icon-only" name="chevron-forward-outline"></ion-icon>
+        </ion-button>
+
+        <span class="page-info">
+          {{ page }} / {{ Math.ceil(total / limit) }}
+        </span>
+      </div>
+    </section>
+
+    <ng-template #emptyMobile>
+      <div class="empty-state">No hay accesos para mostrar.</div>
+    </ng-template>
   </div>
 </ion-content>
