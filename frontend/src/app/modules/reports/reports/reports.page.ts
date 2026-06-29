@@ -12,6 +12,7 @@ import { Auth } from '../../../core/services/auth';
 import { Chart, registerables } from 'chart.js';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
+import { finalize } from 'rxjs';
 
 Chart.register(...registerables);
 
@@ -24,7 +25,6 @@ Chart.register(...registerables);
 export class ReportsPage implements OnInit, AfterViewInit {
   @ViewChild('dayChart') dayChartRef!: ElementRef<HTMLCanvasElement>;
   @ViewChild('residentChart') residentChartRef!: ElementRef<HTMLCanvasElement>;
-  // Nuevos gráficos
   @ViewChild('hourChart') hourChartRef!: ElementRef<HTMLCanvasElement>;
   @ViewChild('visitorChart') visitorChartRef!: ElementRef<HTMLCanvasElement>;
 
@@ -35,7 +35,6 @@ export class ReportsPage implements OnInit, AfterViewInit {
   visitors: Visitor[] = [];
   perDay: any[] = [];
   perResident: any[] = [];
-  // Nuevas propiedades
   perHour: any[] = [];
   topVisitors: any[] = [];
 
@@ -75,9 +74,7 @@ export class ReportsPage implements OnInit, AfterViewInit {
     this.load();
   }
 
-  ngAfterViewInit() {
-    // Los gráficos se renderizan cuando llegan los datos
-  }
+  ngAfterViewInit() {}
 
   loadSelects() {
     this.api.getResidents('', 1, 200).subscribe((res) => {
@@ -124,7 +121,6 @@ export class ReportsPage implements OnInit, AfterViewInit {
         this.perDay = result.perDay || [];
         this.perResident = result.perResident || [];
 
-        // Calcular datos para nuevos gráficos a partir de los logs
         this.calculateExtraCharts();
 
         this.totalPages = Math.ceil(this.total / this.pageSize);
@@ -151,7 +147,6 @@ export class ReportsPage implements OnInit, AfterViewInit {
   }
 
   calculateExtraCharts() {
-    // Accesos por hora (0-23)
     const hourMap = new Map<number, number>();
     for (let i = 0; i < 24; i++) hourMap.set(i, 0);
     this.logs.forEach((log) => {
@@ -162,7 +157,6 @@ export class ReportsPage implements OnInit, AfterViewInit {
       .map(([hour, count]) => ({ hour, count }))
       .sort((a, b) => a.hour - b.hour);
 
-    // Top 5 visitantes (agrupando por nombre de visitante)
     const visitorMap = new Map<string, number>();
     this.logs.forEach((log) => {
       const name = this.getVisitorName(log.visitorId);
@@ -191,7 +185,7 @@ export class ReportsPage implements OnInit, AfterViewInit {
   }
 
   renderCharts() {
-    // 1. Accesos por día (barras)
+    // Gráfico 1: Accesos por día
     if (this.perDay.length > 0 && this.dayChartRef) {
       if (this.dayChart) this.dayChart.destroy();
       const ctx = this.dayChartRef.nativeElement.getContext('2d');
@@ -222,7 +216,7 @@ export class ReportsPage implements OnInit, AfterViewInit {
       });
     }
 
-    // 2. Accesos por residente (tarta)
+    // Gráfico 2: Accesos por residente
     if (this.perResident.length > 0 && this.residentChartRef) {
       if (this.residentChart) this.residentChart.destroy();
       const ctx = this.residentChartRef.nativeElement.getContext('2d');
@@ -263,7 +257,7 @@ export class ReportsPage implements OnInit, AfterViewInit {
       });
     }
 
-    // 3. Accesos por hora (barras)
+    // Gráfico 3: Accesos por hora
     if (this.perHour.length > 0 && this.hourChartRef) {
       if (this.hourChart) this.hourChart.destroy();
       const ctx = this.hourChartRef.nativeElement.getContext('2d');
@@ -294,7 +288,7 @@ export class ReportsPage implements OnInit, AfterViewInit {
       });
     }
 
-    // 4. Top 5 visitantes (barras horizontales)
+    // Gráfico 4: Top 5 visitantes
     if (this.topVisitors.length > 0 && this.visitorChartRef) {
       if (this.visitorChart) this.visitorChart.destroy();
       const ctx = this.visitorChartRef.nativeElement.getContext('2d');
@@ -392,10 +386,81 @@ Estado: ${log.exitDatetime ? 'Completado' : 'Pendiente'}
     await alert.present();
   }
 
+  // ------------------- EXPORTAR PDF (página actual) -------------------
   exportReportPDF() {
+    this.generatePDF(this.logs, 'reporte_accesos_pagina.pdf');
+  }
+
+  // ------------------- EXPORTAR PDF (todos los registros) -------------------
+  exportFullReportPDF() {
+    // Mostrar loading
+    this.loading = true;
+    const params: any = {
+      page: 1,
+      limit: 9999, // Número grande para obtener todos
+    };
+    if (this.filters.startDate) params.startDate = this.filters.startDate;
+    if (this.filters.endDate) params.endDate = this.filters.endDate;
+    if (this.filters.residentId) params.residentId = this.filters.residentId;
+    if (this.filters.vehiclePlate)
+      params.vehiclePlate = this.filters.vehiclePlate;
+
+    this.api
+      .getReport(params)
+      .pipe(finalize(() => (this.loading = false)))
+      .subscribe({
+        next: (result: any) => {
+          const allLogs = result.logs?.data || [];
+          const totalAll = result.logs?.total || 0;
+          this.generatePDF(allLogs, 'reporte_accesos_completo.pdf', totalAll);
+        },
+        error: (err) => {
+          console.error('Error al exportar todo:', err);
+          this.loading = false;
+          // Mostrar un toast o alert de error
+        },
+      });
+  }
+
+  // ------------------- GENERADOR DE PDF (común) -------------------
+  private generatePDF(
+    data: AccessLog[],
+    filename: string,
+    totalRecords?: number,
+  ) {
     const doc = new jsPDF('landscape', 'mm', 'a4');
     const pageWidth = doc.internal.pageSize.getWidth();
 
+    // --- Logo (cargar imagen desde assets) ---
+    const logoUrl = 'assets/icon/paraiso_Verde.png';
+    const img = new Image();
+    img.src = logoUrl;
+    img.onload = () => {
+      // Convertir a base64 mediante canvas
+      const canvas = document.createElement('canvas');
+      canvas.width = img.width;
+      canvas.height = img.height;
+      const ctx = canvas.getContext('2d')!;
+      ctx.drawImage(img, 0, 0);
+      const imgData = canvas.toDataURL('image/png');
+      doc.addImage(imgData, 'PNG', 14, 10, 25, 25);
+      this.generatePDFContent(doc, data, filename, totalRecords);
+    };
+    img.onerror = () => {
+      console.warn('No se pudo cargar el logo, continuando sin él.');
+      this.generatePDFContent(doc, data, filename, totalRecords);
+    };
+  }
+
+  private generatePDFContent(
+    doc: jsPDF,
+    data: AccessLog[],
+    filename: string,
+    totalRecords?: number,
+  ) {
+    const pageWidth = doc.internal.pageSize.getWidth();
+
+    // Título
     doc.setFontSize(20);
     doc.text('Sistema Seguridad - Paraíso Verde', pageWidth / 2, 20, {
       align: 'center',
@@ -414,6 +479,7 @@ Estado: ${log.exitDatetime ? 'Completado' : 'Pendiente'}
       { align: 'center' },
     );
 
+    // Filtros
     let filterText = 'Todos los registros';
     if (this.filters.startDate && this.filters.endDate) {
       filterText = `Desde ${this.filters.startDate} hasta ${this.filters.endDate}`;
@@ -434,12 +500,15 @@ Estado: ${log.exitDatetime ? 'Completado' : 'Pendiente'}
     doc.setFontSize(10);
     doc.text(`Filtro: ${filterText}`, 14, 44);
 
+    // Resumen
+    const total = totalRecords || data.length;
     doc.setFontSize(11);
-    doc.text(`Total registros: ${this.total}`, 14, 52);
+    doc.text(`Total registros: ${total}`, 14, 52);
     doc.text(`Accesos hoy: ${this.todayAccesses}`, 14, 58);
     doc.text(`Pendientes: ${this.pendingAccesses}`, 14, 64);
 
-    const tableData = this.logs.map((log) => [
+    // Tabla
+    const tableData = data.map((log) => [
       `#${log.id}`,
       this.getResidentName(log.residentId),
       this.getVehiclePlate(log.vehicleId),
@@ -470,6 +539,7 @@ Estado: ${log.exitDatetime ? 'Completado' : 'Pendiente'}
       alternateRowStyles: { fillColor: [245, 245, 245] },
     });
 
+    // Pie de página
     const pageCount = doc.internal.pages.length;
     for (let i = 1; i < pageCount; i++) {
       doc.setPage(i);
@@ -486,6 +556,6 @@ Estado: ${log.exitDatetime ? 'Completado' : 'Pendiente'}
       );
     }
 
-    doc.save('reporte_accesos.pdf');
+    doc.save(filename);
   }
 }

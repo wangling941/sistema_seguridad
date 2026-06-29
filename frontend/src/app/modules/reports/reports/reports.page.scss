@@ -36,16 +36,24 @@
     font-size: 0.9rem;
   }
 
+  .export-buttons {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-top: 8px;
+  }
+
   .export-btn {
     --border-radius: 30px;
-    --padding-start: 18px;
-    --padding-end: 18px;
+    --padding-start: 14px;
+    --padding-end: 14px;
     font-weight: 700;
     min-height: 40px;
-    margin-top: 8px;
+    font-size: 0.85rem;
   }
 }
 
+/* Resto de estilos igual que antes */
 .form-panel {
   background: white;
   border-radius: 20px;
@@ -142,7 +150,6 @@
   }
 }
 
-/* --- GRÁFICOS: grid de 2 columnas en escritorio, 1 en móvil --- */
 .charts-grid {
   display: grid;
   grid-template-columns: 1fr;
@@ -190,7 +197,6 @@
   }
 }
 
-/* --- Tabla y tarjetas --- */
 .data-card {
   background: white;
   border-radius: 20px;

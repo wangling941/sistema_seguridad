@@ -3,7 +3,7 @@
     <ion-buttons slot="start"><ion-menu-button></ion-menu-button></ion-buttons>
     <ion-title>Reportes</ion-title>
     <ion-buttons slot="end">
-      <ion-button (click)="exportReportPDF()">
+      <ion-button (click)="exportReportPDF()" class="export-btn">
         <ion-icon slot="icon-only" name="document-text-outline"></ion-icon>
       </ion-button>
     </ion-buttons>
@@ -17,10 +17,24 @@
         <h1>Reportes de accesos</h1>
         <p>{{ total }} registros encontrados</p>
       </div>
-      <ion-button color="danger" (click)="exportReportPDF()" class="export-btn">
-        <ion-icon slot="start" name="document-text-outline"></ion-icon>
-        Exportar PDF
-      </ion-button>
+      <div class="export-buttons">
+        <ion-button
+          color="primary"
+          (click)="exportReportPDF()"
+          class="export-btn"
+        >
+          <ion-icon slot="start" name="document-text-outline"></ion-icon>
+          Exportar página
+        </ion-button>
+        <ion-button
+          color="success"
+          (click)="exportFullReportPDF()"
+          class="export-btn"
+        >
+          <ion-icon slot="start" name="document-text-outline"></ion-icon>
+          Exportar todo
+        </ion-button>
+      </div>
     </div>
 
     <!-- Filtros -->
@@ -103,31 +117,24 @@
 
     <!-- Sección de gráficos (4 tarjetas) -->
     <section class="charts-grid" *ngIf="!loading && logs.length > 0">
-      <!-- Gráfico 1: Accesos por día -->
       <div class="chart-card">
         <h4>Accesos por día</h4>
         <div class="chart-wrapper">
           <canvas #dayChart></canvas>
         </div>
       </div>
-
-      <!-- Gráfico 2: Accesos por residente -->
       <div class="chart-card">
         <h4>Accesos por residente</h4>
         <div class="chart-wrapper">
           <canvas #residentChart></canvas>
         </div>
       </div>
-
-      <!-- Gráfico 3: Accesos por hora del día -->
       <div class="chart-card">
         <h4>Accesos por hora</h4>
         <div class="chart-wrapper">
           <canvas #hourChart></canvas>
         </div>
       </div>
-
-      <!-- Gráfico 4: Top 5 visitantes -->
       <div class="chart-card">
         <h4>Top 5 visitantes</h4>
         <div class="chart-wrapper">
