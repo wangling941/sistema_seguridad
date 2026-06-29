@@ -74,7 +74,9 @@ export class ReportsPage implements OnInit, AfterViewInit {
     this.load();
   }
 
-  ngAfterViewInit() {}
+  ngAfterViewInit() {
+    // Los gráficos se renderizan cuando llegan los datos
+  }
 
   loadSelects() {
     this.api.getResidents('', 1, 200).subscribe((res) => {
@@ -185,7 +187,7 @@ export class ReportsPage implements OnInit, AfterViewInit {
   }
 
   renderCharts() {
-    // Gráfico 1: Accesos por día
+    // 1. Accesos por día
     if (this.perDay.length > 0 && this.dayChartRef) {
       if (this.dayChart) this.dayChart.destroy();
       const ctx = this.dayChartRef.nativeElement.getContext('2d');
@@ -216,7 +218,7 @@ export class ReportsPage implements OnInit, AfterViewInit {
       });
     }
 
-    // Gráfico 2: Accesos por residente
+    // 2. Accesos por residente
     if (this.perResident.length > 0 && this.residentChartRef) {
       if (this.residentChart) this.residentChart.destroy();
       const ctx = this.residentChartRef.nativeElement.getContext('2d');
@@ -257,7 +259,7 @@ export class ReportsPage implements OnInit, AfterViewInit {
       });
     }
 
-    // Gráfico 3: Accesos por hora
+    // 3. Accesos por hora
     if (this.perHour.length > 0 && this.hourChartRef) {
       if (this.hourChart) this.hourChart.destroy();
       const ctx = this.hourChartRef.nativeElement.getContext('2d');
@@ -288,7 +290,7 @@ export class ReportsPage implements OnInit, AfterViewInit {
       });
     }
 
-    // Gráfico 4: Top 5 visitantes
+    // 4. Top 5 visitantes
     if (this.topVisitors.length > 0 && this.visitorChartRef) {
       if (this.visitorChart) this.visitorChart.destroy();
       const ctx = this.visitorChartRef.nativeElement.getContext('2d');
@@ -393,11 +395,18 @@ Estado: ${log.exitDatetime ? 'Completado' : 'Pendiente'}
 
   // ------------------- EXPORTAR PDF (todos los registros) -------------------
   exportFullReportPDF() {
-    // Mostrar loading
+    // Mostrar loading solo para el botón, no para ocultar gráficos
+    // Pero necesitamos un indicador de carga, lo haremos con un toast o un spinner global
+    // Usaremos loading para mostrar un spinner en el botón, pero no ocultamos gráficos
+    // Para no ocultar gráficos, no usaremos el loading de la página,
+    // sino un estado local para el botón.
+    // Sin embargo, simplificaremos: no usamos loading para ocultar gráficos,
+    // solo mostramos un toast de "Generando..."
+    // Pero mantendremos loading para el indicador, y al finalizar, renderizamos gráficos de nuevo.
     this.loading = true;
     const params: any = {
       page: 1,
-      limit: 9999, // Número grande para obtener todos
+      limit: 9999,
     };
     if (this.filters.startDate) params.startDate = this.filters.startDate;
     if (this.filters.endDate) params.endDate = this.filters.endDate;
@@ -407,7 +416,15 @@ Estado: ${log.exitDatetime ? 'Completado' : 'Pendiente'}
 
     this.api
       .getReport(params)
-      .pipe(finalize(() => (this.loading = false)))
+      .pipe(
+        finalize(() => {
+          this.loading = false;
+          // Después de finalizar, volver a renderizar gráficos
+          setTimeout(() => {
+            this.renderCharts();
+          }, 100);
+        }),
+      )
       .subscribe({
         next: (result: any) => {
           const allLogs = result.logs?.data || [];
@@ -431,12 +448,11 @@ Estado: ${log.exitDatetime ? 'Completado' : 'Pendiente'}
     const doc = new jsPDF('landscape', 'mm', 'a4');
     const pageWidth = doc.internal.pageSize.getWidth();
 
-    // --- Logo (cargar imagen desde assets) ---
+    // Logo
     const logoUrl = 'assets/icon/paraiso_Verde.png';
     const img = new Image();
     img.src = logoUrl;
     img.onload = () => {
-      // Convertir a base64 mediante canvas
       const canvas = document.createElement('canvas');
       canvas.width = img.width;
       canvas.height = img.height;
