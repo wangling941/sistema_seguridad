@@ -1,5 +1,342 @@
-ion-label p {
-  white-space: normal;
-  font-family: ui-monospace, monospace;
-  font-size: 12px;
+.app-surface {
+  --background: #f8fafc;
+}
+
+.page-wrap {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 16px;
+
+  @media (min-width: 768px) {
+    padding: 24px;
+  }
+}
+
+.page-title {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+
+  h1 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #0f172a;
+    margin: 0;
+
+    @media (min-width: 768px) {
+      font-size: 2rem;
+    }
+
+    .unread-badge {
+      position: relative;
+      top: -8px;
+      margin-left: 6px;
+      font-size: 0.7rem;
+      padding: 4px 8px;
+      border-radius: 20px;
+    }
+  }
+
+  p {
+    margin: 4px 0 0 0;
+    color: #64748b;
+    font-size: 0.9rem;
+  }
+
+  .status-indicator {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: #94a3b8;
+    padding: 4px 12px;
+    border-radius: 20px;
+    background: #f1f5f9;
+
+    ion-icon {
+      font-size: 14px;
+      color: #94a3b8;
+    }
+
+    &.connected {
+      color: #16a34a;
+      background: #dcfce7;
+      ion-icon {
+        color: #16a34a;
+      }
+    }
+  }
+}
+
+.filter-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+
+  ion-segment {
+    flex: 1;
+    min-width: 200px;
+    --background: white;
+    border-radius: 12px;
+    padding: 4px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  }
+
+  ion-button {
+    --border-radius: 12px;
+    font-weight: 600;
+    font-size: 0.85rem;
+  }
+}
+
+.data-card {
+  background: white;
+  border-radius: 20px;
+  padding: 16px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
+  overflow: hidden;
+
+  @media (min-width: 768px) {
+    padding: 24px;
+  }
+}
+
+/* --- Tabla escritorio --- */
+.desktop-table {
+  display: none;
+
+  @media (min-width: 768px) {
+    display: block;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+
+    thead {
+      background: #f8fafc;
+      border-radius: 12px;
+
+      th {
+        padding: 12px 16px;
+        text-align: left;
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        color: #475569;
+        letter-spacing: 0.3px;
+        white-space: nowrap;
+      }
+    }
+
+    tbody {
+      tr {
+        border-bottom: 1px solid #f1f5f9;
+        transition: background 0.15s;
+
+        &.unread {
+          background: #f0fdf4;
+          border-left: 4px solid #16a34a;
+
+          &:hover {
+            background: #dcfce7;
+          }
+        }
+
+        &:hover {
+          background: #fafbfc;
+        }
+
+        td {
+          padding: 12px 16px;
+          font-size: 0.9rem;
+          color: #0f172a;
+          vertical-align: middle;
+
+          .event-message {
+            font-size: 0.9rem;
+            line-height: 1.4;
+            max-width: 300px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+          }
+        }
+      }
+    }
+  }
+}
+
+/* --- Tarjetas móvil --- */
+.mobile-cards {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+
+  @media (min-width: 768px) {
+    display: none;
+  }
+
+  .notification-card {
+    background: #fafbfc;
+    border-radius: 16px;
+    padding: 16px;
+    border: 1px solid #e9edf2;
+    transition: all 0.2s;
+
+    &.unread {
+      background: #f0fdf4;
+      border-left: 4px solid #16a34a;
+    }
+
+    &:hover {
+      background: white;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+      flex-wrap: wrap;
+      gap: 8px;
+
+      .card-date {
+        font-size: 0.8rem;
+        color: #64748b;
+      }
+    }
+
+    .card-body {
+      margin-bottom: 12px;
+
+      .event-message {
+        font-size: 0.95rem;
+        line-height: 1.5;
+        color: #0f172a;
+      }
+    }
+
+    .card-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 8px;
+
+      ion-button {
+        --padding-start: 8px;
+        --padding-end: 8px;
+        --min-height: 32px;
+        font-size: 0.8rem;
+      }
+    }
+  }
+}
+
+/* --- Badges y estados --- */
+.event-badge {
+  display: inline-block;
+  padding: 4px 14px;
+  border-radius: 20px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  background: #e2e8f0;
+  color: #475569;
+
+  &.access_created {
+    background: #dbeafe;
+    color: #1d4ed8;
+  }
+
+  &.vehicle_created {
+    background: #fef3c7;
+    color: #b45309;
+  }
+
+  &.resident_created {
+    background: #d1fae5;
+    color: #065f46;
+  }
+}
+
+.read-status {
+  font-size: 0.65rem;
+  padding: 2px 10px;
+  border-radius: 20px;
+  font-weight: 600;
+}
+
+/* --- Estados vacíos y carga --- */
+.empty-state,
+.loading-state {
+  text-align: center;
+  padding: 40px 20px;
+  color: #94a3b8;
+
+  ion-icon {
+    font-size: 48px;
+    margin-bottom: 12px;
+    color: #cbd5e1;
+  }
+
+  p {
+    font-size: 1rem;
+    margin: 0 0 16px 0;
+  }
+}
+
+.loading-state {
+  padding: 60px 20px;
+}
+
+/* --- Paginación --- */
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 16px;
+  margin-top: 24px;
+  padding-top: 16px;
+  border-top: 1px solid #f1f5f9;
+
+  button {
+    background: #f1f5f9;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 8px 14px;
+    cursor: pointer;
+    font-size: 1.2rem;
+    color: #0f172a;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s;
+
+    &:hover:not(:disabled) {
+      background: #e2e8f0;
+    }
+
+    &:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    ion-icon {
+      font-size: 20px;
+    }
+  }
+
+  span {
+    font-size: 0.95rem;
+    color: #475569;
+    font-weight: 500;
+  }
 }

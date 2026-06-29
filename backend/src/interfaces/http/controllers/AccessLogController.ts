@@ -12,6 +12,9 @@ import { CreateAccessLogDto } from "../../../application/dto/CreateAccessLogDto"
 import { UpdateAccessLogDto } from "../../../application/dto/UpdateAccessLogDto";
 import { getParamAsNumber } from "./requestParams";
 
+// ✅ IMPORTAR EL eventEmitter
+import { eventEmitter } from "../dependencies";
+
 export class AccessLogController {
   constructor(
     private createAccessLogUseCase: CreateAccessLogUseCase,
@@ -29,6 +32,14 @@ export class AccessLogController {
     try {
       const dto: CreateAccessLogDto = req.body;
       const accessLog = await this.createAccessLogUseCase.execute(dto);
+
+      // ✅ EMITIR EL EVENTO PARA SSE
+      console.log(
+        "📤 Emitiendo evento access.created:",
+        accessLog.toPrimitives(),
+      );
+      eventEmitter.emit("access.created", accessLog.toPrimitives());
+
       res.status(201).json(accessLog.toPrimitives());
     } catch (error) {
       next(error);

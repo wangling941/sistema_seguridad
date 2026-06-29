@@ -1,8 +1,18 @@
 <ion-header>
   <ion-toolbar>
-    <ion-buttons slot="start"><ion-menu-button></ion-menu-button></ion-buttons>
-    <ion-title>Notificaciones en tiempo real</ion-title>
+    <ion-buttons slot="start">
+      <ion-menu-button></ion-menu-button>
+    </ion-buttons>
+    <ion-title>
+      Notificaciones
+      <ion-badge color="danger" *ngIf="unreadCount > 0" class="unread-badge">
+        {{ unreadCount }}
+      </ion-badge>
+    </ion-title>
     <ion-buttons slot="end">
+      <ion-button (click)="markAllAsRead()" *ngIf="unreadCount > 0">
+        <ion-icon slot="icon-only" name="checkmark-done-outline"></ion-icon>
+      </ion-button>
       <ion-button (click)="clear()">
         <ion-icon slot="icon-only" name="trash-outline"></ion-icon>
       </ion-button>
@@ -12,33 +22,165 @@
 
 <ion-content class="app-surface">
   <div class="page-wrap animate-in">
+    <!-- Cabecera -->
     <div class="page-title">
       <div>
-        <h1>Notificaciones</h1>
-        <p>Eventos SSE emitidos por el backend</p>
+        <h1>Notificaciones en tiempo real</h1>
+        <p *ngIf="!loading">{{ total }} eventos recibidos</p>
+      </div>
+      <div class="status-indicator" [class.connected]="isConnected">
+        <ion-icon name="radio-button-on-outline"></ion-icon>
+        {{ isConnected ? 'Conectado' : 'Desconectado' }}
       </div>
     </div>
 
+    <!-- Filtros -->
+    <div class="filter-bar">
+      <ion-segment [(ngModel)]="filterType" (ionChange)="applyFilters()">
+        <ion-segment-button value="all">
+          <ion-label>Todos</ion-label>
+        </ion-segment-button>
+        <ion-segment-button value="ACCESS_CREATED">
+          <ion-label>Accesos</ion-label>
+        </ion-segment-button>
+        <ion-segment-button value="VEHICLE_CREATED">
+          <ion-label>Vehículos</ion-label>
+        </ion-segment-button>
+        <ion-segment-button value="RESIDENT_CREATED">
+          <ion-label>Residentes</ion-label>
+        </ion-segment-button>
+      </ion-segment>
+      <ion-button fill="outline" size="small" (click)="toggleReadFilter()">
+        <ion-icon
+          slot="start"
+          [name]="showOnlyUnread ? 'eye-off-outline' : 'eye-outline'"
+        ></ion-icon>
+        {{ showOnlyUnread ? 'No leídas' : 'Todas' }}
+      </ion-button>
+    </div>
+
+    <!-- Contenedor de notificaciones -->
     <section class="data-card">
-      <ion-list lines="full" *ngIf="(notifications$ | async) as notifications">
-        <ng-container *ngIf="notifications.length; else empty">
-          <ion-item *ngFor="let item of notifications">
-            <ion-icon slot="start" name="notifications-outline"></ion-icon>
-            <ion-label>
-              <h2>{{ item.type }}</h2>
-              <p>{{ item.payload | json }}</p>
-            </ion-label>
-            <ion-note slot="end"
-              >{{ item.receivedAt | date:'shortTime' }}</ion-note
+      <!-- Escritorio: tabla -->
+      <div class="desktop-table" *ngIf="filteredNotifications.length > 0">
+        <table>
+          <thead>
+            <tr>
+              <th>Evento</th>
+              <th>Detalle</th>
+              <th>Fecha</th>
+              <th style="text-align: center">Estado</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr
+              *ngFor="let item of pagedNotifications"
+              [class.unread]="!item.read"
             >
-          </ion-item>
-        </ng-container>
-      </ion-list>
-      <ng-template #empty
-        ><div class="empty-state">
-          Aún no hay eventos en tiempo real.
-        </div></ng-template
+              <td>
+                <span class="event-badge" [class]="item.type.toLowerCase()">
+                  {{ getEventLabel(item.type) }}
+                </span>
+              </td>
+              <td>
+                <div class="event-message">{{ getMessage(item) }}</div>
+              </td>
+              <td>{{ item.receivedAt | date:'dd/MM/yyyy HH:mm' }}</td>
+              <td style="text-align: center">
+                <ion-badge *ngIf="!item.read" color="danger" class="read-status"
+                  >Nuevo</ion-badge
+                >
+                <ion-badge *ngIf="item.read" color="medium" class="read-status"
+                  >Leído</ion-badge
+                >
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Móvil/Tablet: tarjetas -->
+      <div class="mobile-cards" *ngIf="filteredNotifications.length > 0">
+        <div
+          class="notification-card"
+          *ngFor="let item of pagedNotifications"
+          [class.unread]="!item.read"
+        >
+          <div class="card-header">
+            <span class="event-badge" [class]="item.type.toLowerCase()">
+              {{ getEventLabel(item.type) }}
+            </span>
+            <span class="card-date"
+              >{{ item.receivedAt | date:'dd/MM/yyyy HH:mm' }}</span
+            >
+          </div>
+          <div class="card-body">
+            <div class="event-message">{{ getMessage(item) }}</div>
+          </div>
+          <div class="card-footer">
+            <ion-badge *ngIf="!item.read" color="danger" class="read-status"
+              >Nuevo</ion-badge
+            >
+            <ion-badge *ngIf="item.read" color="medium" class="read-status"
+              >Leído</ion-badge
+            >
+            <ion-button
+              fill="clear"
+              size="small"
+              (click)="markAsRead(item)"
+              *ngIf="!item.read"
+            >
+              <ion-icon name="checkmark-outline" slot="start"></ion-icon>
+              Marcar leído
+            </ion-button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Estado vacío -->
+      <div
+        class="empty-state"
+        *ngIf="filteredNotifications.length === 0 && !loading"
       >
+        <ion-icon name="notifications-off-outline"></ion-icon>
+        <p>
+          {{ showOnlyUnread ? 'No tienes notificaciones no leídas' : 'Aún no hay
+          eventos en tiempo real' }}
+        </p>
+        <ion-button
+          fill="outline"
+          (click)="clearFilters()"
+          *ngIf="filterType !== 'all' || showOnlyUnread"
+        >
+          Limpiar filtros
+        </ion-button>
+      </div>
+
+      <!-- Loading -->
+      <div class="loading-state" *ngIf="loading">
+        <ion-spinner name="crescent"></ion-spinner>
+        <p>Conectando...</p>
+      </div>
+
+      <!-- Paginación -->
+      <div
+        class="pagination"
+        *ngIf="totalPages > 1 && filteredNotifications.length > 0"
+      >
+        <button
+          (click)="changePage(currentPage - 1)"
+          [disabled]="currentPage === 1"
+        >
+          <ion-icon name="chevron-back-outline"></ion-icon>
+        </button>
+        <span>Página {{ currentPage }} de {{ totalPages }}</span>
+        <button
+          (click)="changePage(currentPage + 1)"
+          [disabled]="currentPage === totalPages"
+        >
+          <ion-icon name="chevron-forward-outline"></ion-icon>
+        </button>
+      </div>
     </section>
   </div>
 </ion-content>
