@@ -14,7 +14,7 @@ export class Notification {
   readonly notifications$ = this.notificationsSubject.asObservable();
 
   private reconnectAttempts = 0;
-  private readonly maxReconnectAttempts = 5;
+  private readonly maxReconnectAttempts = 10;
   private reconnectTimeout?: any;
   private reconnectDelay = 3000;
 
@@ -45,9 +45,13 @@ export class Notification {
       console.log('📩 Evento SSE recibido (raw):', event.data);
       try {
         const parsed = JSON.parse(event.data);
-        // Si es un evento de ping o conexión, ignorarlo
-        if (parsed.type === 'CONNECTED' || parsed.type === 'ping') {
-          console.log('📡 Evento de mantenimiento recibido:', parsed.type);
+        console.log('🔍 Evento parseado:', parsed);
+        // Ignorar pings
+        if (
+          event.data.startsWith(':') ||
+          parsed.type === 'ping' ||
+          parsed.type === 'connected'
+        ) {
           return;
         }
         const notification = {
@@ -78,22 +82,21 @@ export class Notification {
       this.source?.close();
       this.source = undefined;
       this.isConnected = false;
-      this.scheduleReconnect();
+      // Solo reconectar si no es un error de red grave
+      if (this.reconnectAttempts < this.maxReconnectAttempts) {
+        this.scheduleReconnect();
+      }
     };
   }
 
   private scheduleReconnect(): void {
-    if (this.reconnectAttempts < this.maxReconnectAttempts) {
-      this.reconnectAttempts++;
-      const delay = this.reconnectDelay * this.reconnectAttempts;
-      console.log(
-        `🔄 Reintentando conexión en ${delay}ms (intento ${this.reconnectAttempts})`,
-      );
-      clearTimeout(this.reconnectTimeout);
-      this.reconnectTimeout = setTimeout(() => this.connect(), delay);
-    } else {
-      console.error('❌ Máximo de intentos de reconexión alcanzado');
-    }
+    this.reconnectAttempts++;
+    const delay = this.reconnectDelay * Math.min(this.reconnectAttempts, 5);
+    console.log(
+      `🔄 Reintentando conexión en ${delay}ms (intento ${this.reconnectAttempts})`,
+    );
+    clearTimeout(this.reconnectTimeout);
+    this.reconnectTimeout = setTimeout(() => this.connect(), delay);
   }
 
   disconnect(): void {
@@ -102,6 +105,8 @@ export class Notification {
     this.isConnected = false;
     clearTimeout(this.reconnectTimeout);
     console.log('🔌 EventSource desconectado');
+    // Resetear intentos para futuras reconexiones
+    this.reconnectAttempts = 0;
   }
 
   clear(): void {

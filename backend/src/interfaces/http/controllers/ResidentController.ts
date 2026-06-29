@@ -8,6 +8,7 @@ import { GetResidentStatusCountsUseCase } from "../../../application/use-cases/r
 import { CreateResidentDto } from "../../../application/dto/CreateResidentDto";
 import { UpdateResidentDto } from "../../../application/dto/UpdateResidentDto";
 import { getParamAsNumber } from "./requestParams";
+import { eventEmitter } from "../dependencies"; // ✅ Importar eventEmitter
 
 export class ResidentController {
   constructor(
@@ -23,7 +24,10 @@ export class ResidentController {
     try {
       const dto: CreateResidentDto = req.body;
       const resident = await this.createResidentUseCase.execute(dto);
-      res.status(201).json(resident.toPrimitives());
+      const primitives = resident.toPrimitives();
+      console.log("📤 Emitiendo evento resident.created:", primitives);
+      eventEmitter.emit("resident.created", primitives);
+      res.status(201).json(primitives);
     } catch (error) {
       next(error);
     }

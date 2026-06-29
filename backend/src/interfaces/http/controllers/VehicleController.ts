@@ -8,6 +8,7 @@ import { GetVehiclesPerResidentUseCase } from "../../../application/use-cases/ve
 import { CreateVehicleDto } from "../../../application/dto/CreateVehicleDto";
 import { UpdateVehicleDto } from "../../../application/dto/UpdateVehicleDto";
 import { getParamAsNumber } from "./requestParams";
+import { eventEmitter } from "../dependencies"; // ✅ Importar eventEmitter
 
 export class VehicleController {
   constructor(
@@ -23,7 +24,10 @@ export class VehicleController {
     try {
       const dto: CreateVehicleDto = req.body;
       const vehicle = await this.createVehicleUseCase.execute(dto);
-      res.status(201).json(vehicle.toPrimitives());
+      const primitives = vehicle.toPrimitives();
+      console.log("📤 Emitiendo evento vehicle.created:", primitives);
+      eventEmitter.emit("vehicle.created", primitives);
+      res.status(201).json(primitives);
     } catch (error) {
       next(error);
     }

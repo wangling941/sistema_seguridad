@@ -30,7 +30,10 @@ export class NotificationsPage implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.loading = true;
-    this.notificationService.connect();
+    // Conectar solo si no está conectado
+    if (!this.notificationService.isConnected) {
+      this.notificationService.connect();
+    }
 
     this.subscription = this.notificationService.notifications$.subscribe({
       next: (items) => {
@@ -59,10 +62,13 @@ export class NotificationsPage implements OnInit, OnDestroy {
   }
 
   ngOnDestroy() {
+    // ✅ NO desconectar SSE al salir del componente
+    // Solo limpiar la suscripción
     this.subscription?.unsubscribe();
-    this.notificationService.disconnect();
+    console.log('🧹 Componente NotificationsPage destruido, SSE sigue activo');
   }
 
+  // ... resto de métodos iguales
   applyFilters() {
     let filtered = [...this.notifications];
 

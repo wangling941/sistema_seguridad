@@ -1,6 +1,6 @@
 import express from "express";
 import cors from "cors";
-import helmet from "helmet";
+// import helmet from "helmet"; // ✅ COMENTADO PARA SSE
 import morgan from "morgan";
 import dotenv from "dotenv";
 import { router } from "./interfaces/http/routes";
@@ -15,7 +15,7 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 // Middlewares
-app.use(helmet());
+// app.use(helmet()); // ✅ COMENTADO
 app.use(cors());
 app.use(morgan("dev"));
 app.use(express.json());
@@ -42,5 +42,5 @@ app.use("/api", router);
 app.use(errorHandler);
 
 app.listen(PORT, () => {
-  console.log(`Servidor corriendo en http://localhost:${PORT}`);
+  console.log(`🚀 Servidor corriendo en http://localhost:${PORT}`);
 });

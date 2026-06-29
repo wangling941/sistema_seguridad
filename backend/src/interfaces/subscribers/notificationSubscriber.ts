@@ -13,5 +13,21 @@ export const setupNotificationSubscriber = (
     });
   });
 
-  console.log("✅ Subscriber de notificaciones configurado");
+  eventEmitter.on("vehicle.created", (data) => {
+    console.log("📥 Evento 'vehicle.created' recibido en subscriber:", data);
+    sseManager.sendEvent({
+      type: "VEHICLE_CREATED",
+      payload: data,
+    });
+  });
+
+  eventEmitter.on("resident.created", (data) => {
+    console.log("📥 Evento 'resident.created' recibido en subscriber:", data);
+    sseManager.sendEvent({
+      type: "RESIDENT_CREATED",
+      payload: data,
+    });
+  });
+
+  console.log("✅ Subscriber configurado: ACCESS, VEHICLE, RESIDENT");
 };
