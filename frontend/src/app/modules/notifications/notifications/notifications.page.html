@@ -36,21 +36,32 @@
 
     <!-- Filtros -->
     <div class="filter-bar">
-      <ion-segment [(ngModel)]="filterType" (ionChange)="applyFilters()">
-        <ion-segment-button value="all">
-          <ion-label>Todos</ion-label>
-        </ion-segment-button>
-        <ion-segment-button value="ACCESS_CREATED">
-          <ion-label>Accesos</ion-label>
-        </ion-segment-button>
-        <ion-segment-button value="VEHICLE_CREATED">
-          <ion-label>Vehículos</ion-label>
-        </ion-segment-button>
-        <ion-segment-button value="RESIDENT_CREATED">
-          <ion-label>Residentes</ion-label>
-        </ion-segment-button>
-      </ion-segment>
-      <ion-button fill="outline" size="small" (click)="toggleReadFilter()">
+      <div class="segment-wrapper">
+        <ion-segment
+          [(ngModel)]="filterType"
+          (ionChange)="applyFilters()"
+          scrollable="true"
+        >
+          <ion-segment-button value="all">
+            <ion-label>Todos</ion-label>
+          </ion-segment-button>
+          <ion-segment-button value="ACCESS_CREATED">
+            <ion-label>Accesos</ion-label>
+          </ion-segment-button>
+          <ion-segment-button value="VEHICLE_CREATED">
+            <ion-label>Vehículos</ion-label>
+          </ion-segment-button>
+          <ion-segment-button value="RESIDENT_CREATED">
+            <ion-label>Residentes</ion-label>
+          </ion-segment-button>
+        </ion-segment>
+      </div>
+      <ion-button
+        fill="outline"
+        size="small"
+        (click)="toggleReadFilter()"
+        class="filter-btn"
+      >
         <ion-icon
           slot="start"
           [name]="showOnlyUnread ? 'eye-off-outline' : 'eye-outline'"
@@ -118,17 +129,20 @@
             <div class="event-message">{{ getMessage(item) }}</div>
           </div>
           <div class="card-footer">
-            <ion-badge *ngIf="!item.read" color="danger" class="read-status"
-              >Nuevo</ion-badge
-            >
-            <ion-badge *ngIf="item.read" color="medium" class="read-status"
-              >Leído</ion-badge
-            >
+            <div class="card-status">
+              <ion-badge *ngIf="!item.read" color="danger" class="read-status"
+                >Nuevo</ion-badge
+              >
+              <ion-badge *ngIf="item.read" color="medium" class="read-status"
+                >Leído</ion-badge
+              >
+            </div>
             <ion-button
               fill="clear"
               size="small"
               (click)="markAsRead(item)"
               *ngIf="!item.read"
+              class="read-btn"
             >
               <ion-icon name="checkmark-outline" slot="start"></ion-icon>
               Marcar leído
@@ -170,6 +184,7 @@
         <button
           (click)="changePage(currentPage - 1)"
           [disabled]="currentPage === 1"
+          class="page-btn"
         >
           <ion-icon name="chevron-back-outline"></ion-icon>
         </button>
@@ -177,6 +192,7 @@
         <button
           (click)="changePage(currentPage + 1)"
           [disabled]="currentPage === totalPages"
+          class="page-btn"
         >
           <ion-icon name="chevron-forward-outline"></ion-icon>
         </button>
