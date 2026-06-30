@@ -8,41 +8,86 @@
         <p>Regístrate para acceder al sistema</p>
       </div>
 
-      <form (ngSubmit)="register()" #registerForm="ngForm">
+      <form [formGroup]="registerForm" (ngSubmit)="register()">
+        <!-- Usuario -->
         <ion-item>
           <ion-icon slot="start" name="person-outline"></ion-icon>
           <ion-input
             label="Usuario"
             labelPlacement="stacked"
-            [(ngModel)]="username"
-            name="username"
-            required
+            formControlName="username"
+            placeholder="Mínimo 3 caracteres, solo letras y números"
           ></ion-input>
         </ion-item>
+        <div
+          class="error-message"
+          *ngIf="username?.invalid && (username?.dirty || username?.touched)"
+        >
+          <span *ngIf="username?.errors?.['required']"
+            >El usuario es obligatorio.</span
+          >
+          <span *ngIf="username?.errors?.['minlength']"
+            >Debe tener al menos 3 caracteres.</span
+          >
+          <span *ngIf="username?.errors?.['pattern']"
+            >Solo se permiten letras y números.</span
+          >
+        </div>
+
+        <!-- Contraseña -->
         <ion-item>
           <ion-icon slot="start" name="lock-closed-outline"></ion-icon>
           <ion-input
             label="Contraseña"
             labelPlacement="stacked"
-            [(ngModel)]="password"
-            name="password"
+            formControlName="password"
             type="password"
-            required
+            placeholder="Mínimo 6 caracteres, con letras y números"
           ></ion-input>
         </ion-item>
+        <div
+          class="error-message"
+          *ngIf="password?.invalid && (password?.dirty || password?.touched)"
+        >
+          <span *ngIf="password?.errors?.['required']"
+            >La contraseña es obligatoria.</span
+          >
+          <span *ngIf="password?.errors?.['minlength']"
+            >Debe tener al menos 6 caracteres.</span
+          >
+          <span *ngIf="password?.errors?.['pattern']"
+            >Debe contener al menos una letra y un número.</span
+          >
+        </div>
+
+        <!-- Confirmar contraseña -->
         <ion-item>
           <ion-icon slot="start" name="lock-closed-outline"></ion-icon>
           <ion-input
             label="Confirmar contraseña"
             labelPlacement="stacked"
-            [(ngModel)]="confirmPassword"
-            name="confirmPassword"
+            formControlName="confirmPassword"
             type="password"
-            required
+            placeholder="Repite tu contraseña"
           ></ion-input>
         </ion-item>
+        <div
+          class="error-message"
+          *ngIf="confirmPassword?.invalid && (confirmPassword?.dirty || confirmPassword?.touched)"
+        >
+          <span *ngIf="confirmPassword?.errors?.['required']"
+            >Debes confirmar la contraseña.</span
+          >
+          <span *ngIf="confirmPassword?.errors?.['mustMatch']"
+            >Las contraseñas no coinciden.</span
+          >
+        </div>
 
-        <ion-button expand="block" type="submit" [disabled]="loading">
+        <ion-button
+          expand="block"
+          type="submit"
+          [disabled]="registerForm.invalid || loading"
+        >
           <ion-spinner *ngIf="loading" name="crescent"></ion-spinner>
           <span *ngIf="!loading">Registrarse</span>
         </ion-button>

@@ -8,30 +8,63 @@
         <p>Paraíso Verde</p>
       </div>
 
-      <form (ngSubmit)="login()" #loginForm="ngForm">
+      <form [formGroup]="loginForm" (ngSubmit)="login()">
+        <!-- Usuario -->
         <ion-item>
           <ion-icon slot="start" name="person-outline"></ion-icon>
           <ion-input
             label="Usuario"
             labelPlacement="stacked"
-            [(ngModel)]="username"
-            name="username"
-            required
+            formControlName="username"
+            placeholder="Ingresa tu usuario"
           ></ion-input>
         </ion-item>
+        <div
+          class="error-message"
+          *ngIf="username?.invalid && (username?.dirty || username?.touched)"
+        >
+          <span *ngIf="username?.errors?.['required']"
+            >El usuario es obligatorio.</span
+          >
+          <span *ngIf="username?.errors?.['minlength']"
+            >Debe tener al menos 3 caracteres.</span
+          >
+          <span *ngIf="username?.errors?.['pattern']"
+            >Solo se permiten letras y números.</span
+          >
+        </div>
+
+        <!-- Contraseña -->
         <ion-item>
           <ion-icon slot="start" name="lock-closed-outline"></ion-icon>
           <ion-input
             label="Contraseña"
             labelPlacement="stacked"
-            [(ngModel)]="password"
-            name="password"
+            formControlName="password"
             type="password"
-            required
+            placeholder="Ingresa tu contraseña"
           ></ion-input>
         </ion-item>
+        <div
+          class="error-message"
+          *ngIf="password?.invalid && (password?.dirty || password?.touched)"
+        >
+          <span *ngIf="password?.errors?.['required']"
+            >La contraseña es obligatoria.</span
+          >
+          <span *ngIf="password?.errors?.['minlength']"
+            >Debe tener al menos 6 caracteres.</span
+          >
+          <span *ngIf="password?.errors?.['pattern']"
+            >Debe contener al menos una letra y un número.</span
+          >
+        </div>
 
-        <ion-button expand="block" type="submit" [disabled]="loading">
+        <ion-button
+          expand="block"
+          type="submit"
+          [disabled]="loginForm.invalid || loading"
+        >
           <ion-spinner *ngIf="loading" name="crescent"></ion-spinner>
           <span *ngIf="!loading">Ingresar</span>
         </ion-button>

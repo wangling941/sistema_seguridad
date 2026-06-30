@@ -1,9 +1,18 @@
 import { Component, OnInit } from '@angular/core';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ToastController } from '@ionic/angular';
 import { finalize } from 'rxjs';
 import { Auth } from '../../../core/services/auth';
 import { Notification } from '../../../core/services/notification';
+
+// Validación personalizada: solo letras y números
+const alphanumericValidator = Validators.pattern(/^[a-zA-Z0-9]+$/);
+
+// Validación de contraseña fuerte: al menos una letra y un número
+const strongPasswordValidator = Validators.pattern(
+  /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{6,}$/,
+);
 
 @Component({
   selector: 'app-login',
@@ -12,11 +21,11 @@ import { Notification } from '../../../core/services/notification';
   standalone: false,
 })
 export class LoginPage implements OnInit {
-  username = 'admin';
-  password = '';
+  loginForm!: FormGroup;
   loading = false;
 
   constructor(
+    private fb: FormBuilder,
     private auth: Auth,
     private notifications: Notification,
     private router: Router,
@@ -25,19 +34,40 @@ export class LoginPage implements OnInit {
   ) {}
 
   ngOnInit() {
+    // Inicializar formulario con validaciones
+    this.loginForm = this.fb.group({
+      username: [
+        '',
+        [Validators.required, Validators.minLength(3), alphanumericValidator],
+      ],
+      password: [
+        '',
+        [Validators.required, Validators.minLength(6), strongPasswordValidator],
+      ],
+    });
+
+    // Si ya está autenticado, redirigir
     if (this.auth.isAuthenticated()) {
       this.router.navigateByUrl('/dashboard');
     }
   }
 
+  // Getters para facilitar el acceso en el template
+  get username() {
+    return this.loginForm.get('username');
+  }
+  get password() {
+    return this.loginForm.get('password');
+  }
+
   login(): void {
-    if (!this.username || !this.password) {
-      this.presentToast('Ingresa usuario y contraseña', 'warning');
-      return;
-    }
+    if (this.loginForm.invalid) return;
+
     this.loading = true;
+    const { username, password } = this.loginForm.value;
+
     this.auth
-      .login(this.username.trim(), this.password)
+      .login(username.trim(), password)
       .pipe(finalize(() => (this.loading = false)))
       .subscribe({
         next: () => {
@@ -60,7 +90,7 @@ export class LoginPage implements OnInit {
 
   private async presentToast(
     message: string,
-    color: 'danger' | 'warning' = 'danger',
+    color: 'danger' | 'warning' | 'success' = 'danger',
   ): Promise<void> {
     const toast = await this.toastController.create({
       message,
