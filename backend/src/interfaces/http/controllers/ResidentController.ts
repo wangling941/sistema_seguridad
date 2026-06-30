@@ -25,10 +25,15 @@ export class ResidentController {
       const dto: CreateResidentDto = req.body;
       const resident = await this.createResidentUseCase.execute(dto);
       const primitives = resident.toPrimitives();
-      console.log("📤 Emitiendo evento resident.created:", primitives);
+
+      // ✅ EMITIR EVENTO CON LOG
+      console.log("🏠 Emitiendo evento resident.created:", primitives);
       eventEmitter.emit("resident.created", primitives);
+      console.log("✅ Evento resident.created emitido correctamente");
+
       res.status(201).json(primitives);
     } catch (error) {
+      console.error("❌ Error en ResidentController.create:", error);
       next(error);
     }
   };

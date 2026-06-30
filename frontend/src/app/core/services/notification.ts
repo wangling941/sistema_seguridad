@@ -45,8 +45,6 @@ export class Notification {
       console.log('📩 Evento SSE recibido (raw):', event.data);
       try {
         const parsed = JSON.parse(event.data);
-        console.log('🔍 Evento parseado:', parsed);
-        // Ignorar pings
         if (
           event.data.startsWith(':') ||
           parsed.type === 'ping' ||
@@ -82,7 +80,6 @@ export class Notification {
       this.source?.close();
       this.source = undefined;
       this.isConnected = false;
-      // Solo reconectar si no es un error de red grave
       if (this.reconnectAttempts < this.maxReconnectAttempts) {
         this.scheduleReconnect();
       }
@@ -104,9 +101,8 @@ export class Notification {
     this.source = undefined;
     this.isConnected = false;
     clearTimeout(this.reconnectTimeout);
-    console.log('🔌 EventSource desconectado');
-    // Resetear intentos para futuras reconexiones
     this.reconnectAttempts = 0;
+    console.log('🔌 EventSource desconectado');
   }
 
   clear(): void {

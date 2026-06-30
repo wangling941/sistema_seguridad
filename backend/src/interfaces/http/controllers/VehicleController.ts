@@ -25,10 +25,15 @@ export class VehicleController {
       const dto: CreateVehicleDto = req.body;
       const vehicle = await this.createVehicleUseCase.execute(dto);
       const primitives = vehicle.toPrimitives();
-      console.log("📤 Emitiendo evento vehicle.created:", primitives);
+
+      // ✅ EMITIR EVENTO CON LOG
+      console.log("🚗 Emitiendo evento vehicle.created:", primitives);
       eventEmitter.emit("vehicle.created", primitives);
+      console.log("✅ Evento vehicle.created emitido correctamente");
+
       res.status(201).json(primitives);
     } catch (error) {
+      console.error("❌ Error en VehicleController.create:", error);
       next(error);
     }
   };

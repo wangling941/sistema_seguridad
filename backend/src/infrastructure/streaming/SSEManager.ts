@@ -7,20 +7,15 @@ export class SSEManager {
     this.clients.push(res);
     console.log(`✅ Cliente SSE agregado. Total: ${this.clients.length}`);
 
-    // Enviar un ping inmediato para mantener la conexión
     if (!res.writableEnded) {
       res.write(": connected\n\n");
-      console.log("📡 Ping inicial enviado");
     }
 
-    // Enviar ping cada 10 segundos
     const interval = setInterval(() => {
       if (!res.writableEnded) {
         res.write(": ping\n\n");
-        console.log("📡 Ping enviado a un cliente");
       } else {
         clearInterval(interval);
-        console.log("⚠️ Cliente cerrado, eliminando ping");
       }
     }, 10000);
 
@@ -32,10 +27,14 @@ export class SSEManager {
   }
 
   sendEvent(data: any): void {
-    console.log(
-      `📤 Enviando evento a ${this.clients.length} cliente(s):`,
-      data.type,
-    );
+    const clientsCount = this.clients.length;
+    console.log(`📤 Enviando evento a ${clientsCount} cliente(s):`, data.type);
+
+    if (clientsCount === 0) {
+      console.warn("⚠️ No hay clientes SSE conectados para enviar el evento");
+      return;
+    }
+
     this.clients.forEach((res, index) => {
       if (!res.writableEnded) {
         try {
@@ -47,6 +46,8 @@ export class SSEManager {
             error,
           );
         }
+      } else {
+        console.log(`⚠️ Cliente ${index + 1} ya cerrado`);
       }
     });
   }

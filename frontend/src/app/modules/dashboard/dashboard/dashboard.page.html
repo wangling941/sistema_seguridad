@@ -5,7 +5,7 @@
     </ion-buttons>
     <ion-title>Panel de control</ion-title>
     <ion-buttons slot="end">
-      <ion-button (click)="loadData()">
+      <ion-button (click)="refresh()">
         <ion-icon slot="icon-only" name="refresh-outline"></ion-icon>
       </ion-button>
     </ion-buttons>
@@ -14,6 +14,7 @@
 
 <ion-content class="app-surface">
   <div class="page-wrap animate-in">
+    <!-- Título -->
     <div class="page-title">
       <div>
         <h1>Resumen ejecutivo</h1>
@@ -21,7 +22,7 @@
       </div>
     </div>
 
-    <!-- Cards de métricas -->
+    <!-- Tarjetas de métricas -->
     <div class="stats-grid">
       <ion-card class="stat-card">
         <ion-card-content>
@@ -32,6 +33,10 @@
           ></ion-icon>
           <div class="stat-number">{{ total(residentCounts) }}</div>
           <div class="stat-label">Residentes</div>
+          <div class="stat-trend" *ngIf="residentCounts.length > 1">
+            <ion-icon name="trending-up-outline"></ion-icon>
+            <span>+{{ residentCounts[0]?.count || 0 }} activos</span>
+          </div>
         </ion-card-content>
       </ion-card>
 
@@ -44,6 +49,22 @@
           ></ion-icon>
           <div class="stat-number">{{ total(visitorCounts) }}</div>
           <div class="stat-label">Visitantes</div>
+          <div class="stat-trend" *ngIf="visitorCounts.length > 1">
+            <ion-icon name="trending-up-outline"></ion-icon>
+            <span>+{{ visitorCounts[0]?.count || 0 }} activos</span>
+          </div>
+        </ion-card-content>
+      </ion-card>
+
+      <ion-card class="stat-card">
+        <ion-card-content>
+          <ion-icon
+            name="car-outline"
+            class="stat-icon"
+            style="color: #7c3aed"
+          ></ion-icon>
+          <div class="stat-number">{{ totalVehicles }}</div>
+          <div class="stat-label">Vehículos</div>
         </ion-card-content>
       </ion-card>
 
@@ -54,8 +75,8 @@
             class="stat-icon"
             style="color: #ca8a04"
           ></ion-icon>
-          <div class="stat-number">{{ recent.length }}</div>
-          <div class="stat-label">Accesos recientes</div>
+          <div class="stat-number">{{ totalAccesses }}</div>
+          <div class="stat-label">Accesos totales</div>
         </ion-card-content>
       </ion-card>
 
@@ -70,57 +91,97 @@
           <div class="stat-label">Accesos abiertos</div>
         </ion-card-content>
       </ion-card>
+
+      <ion-card class="stat-card">
+        <ion-card-content>
+          <ion-icon
+            name="checkmark-circle-outline"
+            class="stat-icon"
+            style="color: #16a34a"
+          ></ion-icon>
+          <div class="stat-number">{{ accessCounts[1]?.count || 0 }}</div>
+          <div class="stat-label">Accesos completados</div>
+        </ion-card-content>
+      </ion-card>
     </div>
 
-    <!-- Gráfico de últimos 7 días -->
-    <ion-card class="data-card">
-      <ion-card-header>
-        <ion-card-title>Accesos últimos 7 días</ion-card-title>
-      </ion-card-header>
-      <ion-card-content>
-        <div class="bar-chart" *ngIf="last7Days.length">
-          <div class="bar-item" *ngFor="let day of last7Days">
-            <span class="bar-label">{{ day.date | date:'dd/MM' }}</span>
-            <div class="bar-track">
-              <div
-                class="bar-fill"
-                [style.width.%]="(day.count / maxCount) * 100"
-              ></div>
-            </div>
-            <span class="bar-value">{{ day.count }}</span>
+    <!-- Gráficos -->
+    <div class="charts-grid">
+      <ion-card class="data-card chart-card">
+        <ion-card-header>
+          <ion-card-title>Accesos últimos 7 días</ion-card-title>
+        </ion-card-header>
+        <ion-card-content>
+          <div class="chart-wrapper">
+            <canvas id="barChart"></canvas>
           </div>
-        </div>
-        <div class="empty-state" *ngIf="!last7Days.length">
-          Sin actividad en los últimos 7 días.
-        </div>
-      </ion-card-content>
-    </ion-card>
+          <div class="empty-state" *ngIf="!last7Days.length">
+            Sin actividad en los últimos 7 días.
+          </div>
+        </ion-card-content>
+      </ion-card>
+
+      <ion-card class="data-card chart-card">
+        <ion-card-header>
+          <ion-card-title>Distribución de accesos</ion-card-title>
+        </ion-card-header>
+        <ion-card-content>
+          <div class="chart-wrapper">
+            <canvas id="pieChart"></canvas>
+          </div>
+          <div class="empty-state" *ngIf="!recent.length">
+            Sin datos recientes.
+          </div>
+        </ion-card-content>
+      </ion-card>
+    </div>
 
     <!-- Últimos accesos -->
     <ion-card class="data-card">
       <ion-card-header>
-        <ion-card-title>Últimos accesos</ion-card-title>
+        <ion-card-title>Últimas actividades</ion-card-title>
       </ion-card-header>
       <ion-card-content>
-        <ion-list lines="full" *ngIf="recent.length; else noRecent">
-          <ion-item *ngFor="let item of recent">
-            <ion-icon
-              slot="start"
-              name="log-in-outline"
-              [color]="item.exitDatetime ? 'success' : 'warning'"
-            ></ion-icon>
-            <ion-label>
-              <h3>Acceso #{{ item.id }}</h3>
-              <p>
-                Residente {{ getResidentName(item.residentId) }} · Vehículo {{
-                getVehiclePlate(item.vehicleId) }}
-              </p>
-            </ion-label>
-            <ion-note slot="end"
-              >{{ item.entryDatetime | date:'short' }}</ion-note
-            >
-          </ion-item>
-        </ion-list>
+        <div class="activity-list" *ngIf="recent.length; else noRecent">
+          <div class="activity-item" *ngFor="let item of recent">
+            <div class="activity-icon" [class.completed]="item.exitDatetime">
+              <ion-icon name="log-in-outline"></ion-icon>
+            </div>
+            <div class="activity-details">
+              <div class="activity-title">
+                <strong>Acceso #{{ item.id }}</strong>
+                <span
+                  class="activity-status"
+                  [class.completed]="item.exitDatetime"
+                >
+                  {{ item.exitDatetime ? 'Completado' : 'Pendiente' }}
+                </span>
+              </div>
+              <div class="activity-meta">
+                <span *ngIf="item.residentId">
+                  <ion-icon name="person-outline"></ion-icon> {{
+                  getResidentName(item.residentId) }}
+                </span>
+                <span *ngIf="item.vehicleId">
+                  <ion-icon name="car-outline"></ion-icon> {{
+                  getVehiclePlate(item.vehicleId) }}
+                </span>
+                <span *ngIf="item.visitorId">
+                  <ion-icon name="person-add-outline"></ion-icon> {{
+                  getVisitorName(item.visitorId) }}
+                </span>
+                <span
+                  *ngIf="!item.residentId && !item.vehicleId && !item.visitorId"
+                >
+                  <ion-icon name="help-outline"></ion-icon> Sin datos
+                </span>
+              </div>
+            </div>
+            <div class="activity-time">
+              {{ item.entryDatetime | date:'short' }}
+            </div>
+          </div>
+        </div>
         <ng-template #noRecent>
           <div class="empty-state">Aún no hay accesos registrados.</div>
         </ng-template>
