@@ -197,25 +197,7 @@ frontend/src/app/
 
 ### **📸 Capturas de Pantalla**
 
-### **Dashboard**
-
-frontend\src\assets\screenshots\panel.webp
-
-### **Gestión de Residentes**
-
-frontend\src\assets\screenshots\residentes.webp
-
-### **Control de Accesos**
-
-frontend\src\assets\screenshots\control de accesos.webp
-
-### **Notificaciones en Tiempo Real**
-
-frontend\src\assets\screenshots\notificaciones.webp
-
-### **Reportes**
-
-frontend\src\assets\screenshots\reportes.webp
+<div align="center"> <table> <tr> <td align="center"><strong>Dashboard</strong><br><img src="./frontend/src/assets/screenshots/panel.webp" width="400" alt="Dashboard"/></td> <td align="center"><strong>Gestión de Residentes</strong><br><img src="./frontend/src/assets/screenshots/residentes.webp" width="400" alt="Residentes"/></td> </tr> <tr> <td align="center"><strong>Control de Accesos</strong><br><img src="./frontend/src/assets/screenshots/control-accesos.webp" width="400" alt="Accesos"/></td> <td align="center"><strong>Notificaciones en Tiempo Real</strong><br><img src="./frontend/src/assets/screenshots/notificaciones.webp" width="400" alt="Notificaciones"/></td> </tr> <tr> <td align="center" colspan="2"><strong>Reportes</strong><br><img src="./frontend/src/assets/screenshots/reportes.webp" width="400" alt="Reportes"/></td> </tr> </table> </div>
 
 ### **🤝 Contribuciones**
 
