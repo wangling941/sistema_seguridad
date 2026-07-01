@@ -109,3 +109,35 @@ npx prisma db seed
 cd ../frontend
 npm install
 ```
+
+### **3. Configurar variables de entorno**
+
+Crea un archivo .env en la carpeta backend/ con el siguiente contenido (ajusta los valores según tu configuración):
+
+```bash
+# Base de datos
+DATABASE_URL="postgresql://postgres:tu_password@localhost:5432/seguridad_paraiso_verde?schema=public"
+
+# JWT
+JWT_SECRET="tu_clave_secreta"
+JWT_EXPIRES_IN="8h"
+
+# Servidor
+PORT=3000
+NODE_ENV="development"
+
+# URL del frontend (para el enlace de notificaciones SSE)
+FRONTEND_URL=http://localhost:8100
+```
+
+### **4. Iniciar la aplicación**
+
+```bash
+# Iniciar el backend (desde /backend)
+npm run dev
+
+# Iniciar el frontend (desde /frontend)
+ionic serve
+# o con Angular CLI:
+ng serve
+```
