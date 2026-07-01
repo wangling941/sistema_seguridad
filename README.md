@@ -195,9 +195,39 @@ frontend/src/app/
     └── sidebar/                     # Sidebar con navegación según rol
 ```
 
-### **📸 Capturas de Pantalla**
+### 📸 Capturas de Pantalla
 
-<div align="center"> <table> <tr> <td align="center"><strong>Dashboard</strong><br><img src="./frontend/src/assets/screenshots/panel.webp" width="400" alt="Dashboard"/></td> <td align="center"><strong>Gestión de Residentes</strong><br><img src="./frontend/src/assets/screenshots/residentes.webp" width="400" alt="Residentes"/></td> </tr> <tr> <td align="center"><strong>Control de Accesos</strong><br><img src="./frontend/src/assets/screenshots/control-accesos.webp" width="400" alt="Accesos"/></td> <td align="center"><strong>Notificaciones en Tiempo Real</strong><br><img src="./frontend/src/assets/screenshots/notificaciones.webp" width="400" alt="Notificaciones"/></td> </tr> <tr> <td align="center" colspan="2"><strong>Reportes</strong><br><img src="./frontend/src/assets/screenshots/reportes.webp" width="400" alt="Reportes"/></td> </tr> </table> </div>
+<div align="center">
+
+**Dashboard**
+<br>
+<img src="./frontend/src/assets/screenshots/panel.webp" width="500" alt="Dashboard">
+
+**Gestión de Residentes**
+<br>
+<img src="./frontend/src/assets/screenshots/residentes.webp" width="500" alt="Residentes">
+
+**Gestión de Visitantes**
+<br>
+<img src="./frontend/src/assets/screenshots/vehiculos.webp" width="500" alt="Vehiculos">
+
+**Gestión de Vehiculos**
+<br>
+<img src="./frontend/src/assets/screenshots/visitantes.webp" width="500" alt="Visitantes">
+
+**Control de Accesos**
+<br>
+<img src="./frontend/src/assets/screenshots/control-accesos.webp" width="500" alt="Accesos">
+
+**Notificaciones en Tiempo Real**
+<br>
+<img src="./frontend/src/assets/screenshots/notificaciones.webp" width="500" alt="Notificaciones">
+
+**Reportes**
+<br>
+<img src="./frontend/src/assets/screenshots/reportes.webp" width="500" alt="Reportes">
+
+</div>
 
 ### **🤝 Contribuciones**
 
@@ -215,4 +245,4 @@ Si este proyecto te resultó útil o te sirvió como referencia, considera darle
 
 ### **👨‍💻 Desarrollador**
 
-<p align="center"> <br> <img src="frontend/src/assets/icon/developer.jpg" alt="Foto de perfil" width="120" style="border-radius: 50%;"> <br> <strong>WangLing</strong> <br> <em>Desarrollador Full-Stack | Apasionado por la tecnología y las soluciones empresariales</em> </p><p align="center"> <a href="https://github.com/wangling941"> <img src="https://img.shields.io/badge/GitHub-wangling941-181717?style=for-the-badge&logo=github" alt="GitHub"> </a> &nbsp; <a href="mailto:kevinvillegas.dev@gmail.com"> <img src="https://img.shields.io/badge/Email-Contacto-D14836?style=for-the-badge&logo=gmail&logoColor=white" alt="Email"> </a> &nbsp; <a href="https://www.linkedin.com/in/kevin-villegas-solis-7b0038366/"> <img src="https://img.shields.io/badge/LinkedIn-Kevin%20Villegas%20Solis-0077B5?style=for-the-badge&logo=linkedin&logoColor=white" alt="LinkedIn"> </a> </p><p align="center"> Hecho con ❤️ para la seguridad de tu comunidad. </p> ```
+<p align="center"> <br> <img src="frontend/src/assets/icon/wangling.jpg" alt="Foto de perfil" width="120" style="border-radius: 50%;"> <br> <strong>WangLing</strong> <br> <em>Desarrollador Full-Stack | Apasionado por la tecnología y las soluciones empresariales</em> </p><p align="center"> <a href="https://github.com/wangling941"> <img src="https://img.shields.io/badge/GitHub-wangling941-181717?style=for-the-badge&logo=github" alt="GitHub"> </a> &nbsp; <a href="mailto:kevinvillegas.dev@gmail.com"> <img src="https://img.shields.io/badge/Email-Contacto-D14836?style=for-the-badge&logo=gmail&logoColor=white" alt="Email"> </a> &nbsp; <a href="https://www.linkedin.com/in/kevin-villegas-solis-7b0038366/"> <img src="https://img.shields.io/badge/LinkedIn-Kevin%20Villegas%20Solis-0077B5?style=for-the-badge&logo=linkedin&logoColor=white" alt="LinkedIn"> </a> </p><p align="center"> Hecho con ❤️ para la seguridad de tu comunidad. </p> ```
