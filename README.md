@@ -9,7 +9,7 @@
 
 <p align="center">
   <img src="https://img.shields.io/badge/Estado-Producción%20(Activo)-blue" alt="Estado: Producción">
-  <img src="https://img.shields.io/badge/versión-2.0.0-blue" alt="Versión 2.0.0">
+  <img src="https://img.shields.io/badge/versión-1.0.0-blue" alt="Versión 1.0.0">
   <img src="https://img.shields.io/badge/Licencia-MIT-green" alt="Licencia MIT">
 </p>
 
@@ -141,3 +141,96 @@ ionic serve
 # o con Angular CLI:
 ng serve
 ```
+
+-Frontend: http://localhost:8100 (por defecto con Ionic) o http://localhost:4200 (con ng serve)
+-Backend: http://localhost:3000
+
+### **🏗️ Arquitectura del Proyecto**
+
+El sistema está construido sobre una Clean Architecture con Screaming Architecture, separando el código en capas bien definidas para garantizar mantenibilidad y escalabilidad.
+
+### **Estructura del Backend**
+
+```bash
+backend/
+├── src/
+│   ├── application/                 # Casos de uso y lógica de negocio
+│   │   ├── dto/                     # Data Transfer Objects
+│   │   ├── ports/                   # Interfaces (repositorios, servicios)
+│   │   └── use-cases/               # Casos de uso (Resident, Vehicle, Visitor, Access, Report)
+│   ├── domain/                      # Entidades y excepciones del dominio
+│   │   ├── entities/                # Entidades de negocio (Resident, Vehicle, Visitor, AccessLog, User)
+│   │   └── exceptions/              # Excepciones personalizadas (DomainError, ValidationError, etc.)
+│   ├── infrastructure/              # Implementaciones concretas
+│   │   ├── auth/                    # Servicios de autenticación (JWT, Encryption)
+│   │   ├── persistence/             # Prisma client y repositorios
+│   │   ├── streaming/               # SSE Manager y EventEmitter
+│   │   └── config/                  # Configuraciones (env, Prisma)
+│   └── interfaces/                  # Adaptadores HTTP (controllers, middlewares, routes)
+│       ├── http/                    # Controllers, middlewares, rutas
+│       └── subscribers/             # Suscriptores de eventos (notificaciones)
+└── prisma/                          # Esquema de base de datos, migraciones y seed
+```
+
+### **Estructura del frontend**
+
+```bash
+frontend/src/app/
+├── core/                            # Servicios, guards, interceptores
+│   ├── guards/                      # auth.guard, role.guard
+│   ├── interceptors/                # auth.interceptor, error.interceptor
+│   ├── models/                      # Interfaces y tipos (RealtimeNotification, AccessLog, etc.)
+│   └── services/                    # Api, Auth, Notification, PageTitle
+├── modules/                         # Módulos funcionales
+│   ├── access/                      # Control de accesos (listado, creación, registro de salida)
+│   ├── auth/                        # Login y Register (con validaciones)
+│   ├── dashboard/                   # Panel de control con métricas y gráficos
+│   ├── notifications/               # Notificaciones en tiempo real (SSE)
+│   ├── reports/                     # Reportes y análisis (filtros, gráficos, exportación PDF)
+│   ├── residents/                   # Gestión de residentes (CRUD)
+│   ├── vehicles/                    # Gestión de vehículos (CRUD)
+│   └── visitors/                    # Gestión de visitantes (CRUD)
+└── shell/                           # Layout principal (header + sidebar)
+    ├── header/                      # Header con título dinámico y usuario
+    └── sidebar/                     # Sidebar con navegación según rol
+```
+
+### **📸 Capturas de Pantalla**
+
+### **Dashboard**
+
+frontend\src\assets\screenshots\panel.webp
+
+### **Gestión de Residentes**
+
+frontend\src\assets\screenshots\residentes.webp
+
+### **Control de Accesos**
+
+frontend\src\assets\screenshots\control de accesos.webp
+
+### **Notificaciones en Tiempo Real**
+
+frontend\src\assets\screenshots\notificaciones.webp
+
+### **Reportes**
+
+frontend\src\assets\screenshots\reportes.webp
+
+### **🤝 Contribuciones**
+
+¡Gracias por tu interés en mejorar el proyecto!
+
+Si encuentras un error, tienes una sugerencia o deseas proponer una mejora, puedes:
+
+- Abrir un Issue describiendo el problema o la idea.
+
+- Hacer un Fork del repositorio y enviar un Pull Request con tus cambios.
+
+Todas las contribuciones serán revisadas antes de ser integradas al proyecto.
+
+Si este proyecto te resultó útil o te sirvió como referencia, considera darle una ⭐ al repositorio. ¡Gracias por tu apoyo!
+
+### **👨‍💻 Desarrollador**
+
+<p align="center"> <br> <img src="frontend/src/assets/icon/developer.jpg" alt="Foto de perfil" width="120" style="border-radius: 50%;"> <br> <strong>WangLing</strong> <br> <em>Desarrollador Full-Stack | Apasionado por la tecnología y las soluciones empresariales</em> </p><p align="center"> <a href="https://github.com/wangling941"> <img src="https://img.shields.io/badge/GitHub-wangling941-181717?style=for-the-badge&logo=github" alt="GitHub"> </a> &nbsp; <a href="mailto:kevinvillegas.dev@gmail.com"> <img src="https://img.shields.io/badge/Email-Contacto-D14836?style=for-the-badge&logo=gmail&logoColor=white" alt="Email"> </a> &nbsp; <a href="https://www.linkedin.com/in/kevin-villegas-solis-7b0038366/"> <img src="https://img.shields.io/badge/LinkedIn-Kevin%20Villegas%20Solis-0077B5?style=for-the-badge&logo=linkedin&logoColor=white" alt="LinkedIn"> </a> </p><p align="center"> Hecho con ❤️ para la seguridad de tu comunidad. </p> ```
