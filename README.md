@@ -142,9 +142,6 @@ ionic serve
 ng serve
 ```
 
--Frontend: http://localhost:8100 (por defecto con Ionic) o http://localhost:4200 (con ng serve)
--Backend: http://localhost:3000
-
 ### **🏗️ Arquitectura del Proyecto**
 
 El sistema está construido sobre una Clean Architecture con Screaming Architecture, separando el código en capas bien definidas para garantizar mantenibilidad y escalabilidad.
